@@ -15,6 +15,34 @@
     </dependencySets>
 
     <fileSets>
+		<fileSet>
+            <directory>.</directory>
+            <outputDirectory>/</outputDirectory>
+
+			<excludes>
+				<exclude> *.bak </exclude>
+				<exclude> *~ </exclude>
+			</excludes>
+
+            <includes>
+                <include>LICENSE*</include>
+                <include>README*</include>
+                <include>INSTALL*</include>
+                <include>examples/**</include>
+                <include>config/**</include>
+            </includes>
+
+
+        </fileSet>
+
+		<fileSet>
+			<directory> examples </directory>
+			<excludes>
+				<exclude> *.bak </exclude>
+				<exclude> *~ </exclude>
+			</excludes>
+		</fileSet>
+
         <!--
             Adds startup scripts to the root directory of zip package. The startup
             scripts are copied from the src/main/scripts directory.
@@ -22,7 +50,7 @@
         <fileSet>
             <directory>${project.build.scriptSourceDirectory}</directory>
             <outputDirectory></outputDirectory>
-            <includes>             
+            <includes>
             </includes>
         </fileSet>
         <!--

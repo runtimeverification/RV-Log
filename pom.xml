@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>LogAnalysis</groupId>
-    <artifactId>tracesmop</artifactId>
+    <artifactId>RV-Log</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <build>
@@ -59,7 +59,7 @@
                                 <format>tar.gz</format>
                                 <format>zip</format>
                             </formats>
-                            <finalName>tracesmop</finalName>
+                            <finalName>RV-Log</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                             <outputDirectory>${project.build.directory}/release</outputDirectory>
                         </configuration>
