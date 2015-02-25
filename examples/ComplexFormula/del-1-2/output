@@ -1,0 +1,8 @@
+Exception in thread "main" java.lang.OutOfMemoryError: GC overhead limit exceeded
+	at rvm.LogEntryExtractor.getStringFromBytes(LogReader.java:842)
+	at rvm.LogEntryExtractor.getStringFromBuf(LogReader.java:268)
+	at rvm.LogEntryExtractor.readEvent(LogReader.java:731)
+	at rvm.LogEntryExtractor.startReadingEventsByteByByte(LogReader.java:626)
+	at rvm.LogReader.main(LogReader.java:114)
+
+when monitor 7.6 GB file

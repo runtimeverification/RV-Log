@@ -1,0 +1,19 @@
+    @    127720.1624 insert(    script , db2  , 5,  49887299)
+    insert (    script,db2,5,49887389 )insert(script1,db2,5,
+        49887438
+        )
+insert (script,db2,-5,49887479)
+insert (script,db2,5,49888034)
+commit (abc,5) (abcd,52)
+insert (script,db2,5,4.9888075)
+commit (abc,-5)
+@127.7201625 insert (script2,db2,5,4987299)
+@1277196513 select (user1,db3,[unknown],[unknown])
+@1277200697 script_start (script1)
+@1277393964 update (user6,db3,[unknown],[unknown])
+@1277728781 delete (user7,db3,[unknown],[unknown])
+@1277728782 script_svn (string,string,string,2,57)
+@1277728783 script_md5 (string,string)
+@1277232759 script_end (script1)
+
+@777 publish(27)

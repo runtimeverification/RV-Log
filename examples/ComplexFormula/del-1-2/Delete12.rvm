@@ -1,0 +1,105 @@
+package rvm;
+
+Delete12() {
+    public static class DeleteRecord {
+        public final long ts;
+        public final String user;
+        public final String deleteData;
+
+        public DeleteRecord(long ts, String user, String deleteData) {
+            this.ts = ts;
+            this.user = user;
+            this.deleteData = deleteData;
+        }
+
+        public boolean equals(DeleteRecord other) {
+            if (other == null)
+                return false;
+            if (this.ts != other.ts)
+                return false;
+
+            return (this.user.equals(other.user) &&
+                    this.deleteData.equals(other.deleteData));
+        }
+
+        public String print() {
+            return "@" + ts + " delete (" + user + ", db1, " + deleteData + ")\n";
+        }
+    }
+
+    //the suspiciousRecords is the list of suspicious records.
+    private static Set<DeleteRecord> suspiciousRecords = new HashSet<>();
+    private static HashMap<Long, Set<String>> cond2HasHopeDataList = new HashMap<>();
+    private static Set<String> db1InsertedData = new HashSet<>();
+    //db2InsertedData is eq to cond2 is not satisfiable
+    private static Set<String> db2InsertedData = new HashSet<>();
+
+    private void removeValidatedRecords(String data) {
+        List<DeleteRecord> removedRecords = new ArrayList<>();
+        for (DeleteRecord deleteRecord : suspiciousRecords) {
+            if (deleteRecord.deleteData.equals(data)) {
+                removedRecords.add(deleteRecord);
+            }
+        }
+        suspiciousRecords.removeAll(removedRecords);
+    }
+
+    public static void printAllViolations() {
+        for (DeleteRecord suspiciousRecord : suspiciousRecords) {
+            if (db2InsertedData.contains(suspiciousRecord.deleteData)) {
+                System.out.println("Violation: " + suspiciousRecord.print());
+            } else {
+                Set<String> hopefulDataList = cond2HasHopeDataList.get(suspiciousRecord.ts);
+                if (hopefulDataList == null)
+                    System.out.println("Violation: " + suspiciousRecord.print());
+
+                else if (hopefulDataList.contains(suspiciousRecord.deleteData)) {
+                    System.out.println("Satisfy the second condition of the disjunctive formula");
+                } else {
+                    System.out.println("Violation: " + suspiciousRecord.print());
+                }
+            }
+        }
+    }
+
+event delete (String user,String db,String p,String data) 
+{
+            if (data.equals("unknown"))
+                return true;
+
+            if (db.equals("db1")) {
+                this.suspiciousRecords.add(new DeleteRecord(LogEntryExtractor.TimeStamp, user, data));
+
+                if (db2InsertedData.contains(data))
+                    return true;
+
+                else {
+                    if (db1InsertedData.contains(data)) {
+                        Set<String> dataList = this.cond2HasHopeDataList.get(LogEntryExtractor.TimeStamp);
+                        if (dataList == null) {
+                            dataList = new HashSet<>();
+                            this.cond2HasHopeDataList.put(LogEntryExtractor.TimeStamp, dataList);
+                        }
+
+                        dataList.add(data);
+                    }
+                }
+            } else if (db.equals("db2")) {
+                this.removeValidatedRecords(data);
+            }
+
+}
+
+
+event insert (String user,String db,String p,String data) {
+	if (data.equals("unknown"))
+                return false;
+
+            if (db.equals("db1")) {
+                this.db1InsertedData.add(data);
+            } else if (db.equals("db2")) {
+                this.db2InsertedData.add(data);
+            }
+}
+
+}

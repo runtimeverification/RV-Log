@@ -1,0 +1,4 @@
+FORALL ?user . FORALL ?data . (delete(?user, db1, ?p, ?data) AND NOT(?data = "unknown")) IMPLIES 
+(EVENTUALLY[0,*] EXISTS ?u2 . delete(?u2, db2, ?p, ?data)) OR 
+( ONCE (EXISTS ?u2 . insert(?u2, db1, ?p, ?data)) AND
+(PAST_ALWAYS (ALWAYS[0,*] NOT (EXISTS ?u2 . insert(?u2, db2, ?p, ?data) ) ) ) )

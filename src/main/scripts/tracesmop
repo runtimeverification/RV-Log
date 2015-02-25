@@ -1,0 +1,11 @@
+# The below incantation sets SRC_ROOT to be the canonicalized directory of this script
+SRC_ROOT=$(
+cd -P -- "$(dirname -- "$0")" &&
+printf '%s\n' "$(pwd -P)/$(basename -- "$0")"
+) || exit 1
+SRC_ROOT=`dirname "$SRC_ROOT"`
+
+
+LIB="$SRC_ROOT/lib"
+
+java -cp "$LIB/*:$CLASSPATH" -ea fsl.uiuc.Main $1 $2

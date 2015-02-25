@@ -1,0 +1,52 @@
+package rvm;
+
+
+Insert(String user,String db) {
+public static boolean hasViolation;
+
+  event insert (String user,String db,String p,String data) {
+	 if (db.equals("db2") && !user.equals("script1")) {
+		hasViolation = true;
+	}
+	}
+	 
+}
+
+Pub(Integer report) {
+public static boolean hasViolation;
+
+  event publish (Integer report) {
+		
+	} 
+
+  event approve (Integer report) {
+
+	}
+
+ 
+  ltl: [](publish => <*> approve)
+
+  @violation {
+  hasViolation = true;}
+}
+
+More(String user) {
+public static boolean hasViolation;
+
+event select (String user,String b,String c,String d) {}
+
+event update (String user,String b,String c,String d) {}
+
+event delete (String user,String b,String c,String d) {}
+
+event script_start (String user) {}
+
+event script_end (String user) {}
+
+event script_svn (String user,String b,String c,int d,int e) {}
+
+event script_md5 (String user,String b) {}
+
+event commit (String user,int b) {}
+
+}
