@@ -1,5 +1,5 @@
 <assembly>
-    <id>tracesmop</id>
+    <id>RV-Log</id>
 
     <!-- Adds the dependencies of our application to the lib directory -->
     <dependencySets>
@@ -20,28 +20,20 @@
             <outputDirectory>/</outputDirectory>
 
 			<excludes>
-				<exclude> *.bak </exclude>
-				<exclude> *~ </exclude>
+				<exclude> %regex[.*\.bak] </exclude>
+				<exclude> %regex[.*~] </exclude>
 			</excludes>
 
             <includes>
                 <include>LICENSE*</include>
                 <include>README*</include>
                 <include>INSTALL*</include>
-                <include>examples/**</include>
                 <include>config/**</include>
+				<include>examples/**</include>
             </includes>
-
 
         </fileSet>
 
-		<fileSet>
-			<directory> examples </directory>
-			<excludes>
-				<exclude> *.bak </exclude>
-				<exclude> *~ </exclude>
-			</excludes>
-		</fileSet>
 
         <!--
             Adds startup scripts to the root directory of zip package. The startup
