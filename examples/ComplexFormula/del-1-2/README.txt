@@ -15,10 +15,12 @@ Or: (some time in the past, some user inserted the data 'v' to `database 1`,
 and there never existed, and will never be a user such that he/she inserted
 to `database 2` the data 'v').
 
-Monply cannot monitor such property because it uses unbounded future operator.
+Monply[1] cannot monitor such property because it uses unbounded future operator.
 Output of Monpoly: "The formula contains an unbounded future temporal operator. It is hence not monitorable."
 
-There is no way to check the value after slicing, so in the event action
-method, data field is checked to eliminate the events that will not cause violations of the property.
+RV-Log does not refuse to monitor the liveness property, but it may run out of memory when 
+the input log file is huge.
 
 
+[1] MonPoly is a prototype monitoring tool that checks compliance of log files with respect to policies, developed by ETH.
+https://sourceforge.net/projects/monpoly/.
