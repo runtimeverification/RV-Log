@@ -196,7 +196,7 @@ public class InvokerGenerator {
 
         JType objArrListTy = CodeModel.ref(List.class).narrow(Object[].class);
         JVar violationsInCurLogEntry = Main.IsMonitoringLivenessProperty
-                                    ? null : method.param(objArrListTy, objArrListStr);
+                ? null : method.param(objArrListTy, objArrListStr);
 
         //gen the body of the method
         JBlock body = method.body();
