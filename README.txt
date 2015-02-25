@@ -24,9 +24,9 @@ v.1.8 or higher
 
 Currently, the only option for setting up the tool is building from source.
 
-1. Clone Repository: In the whatever directory you like, execute:
+1. Clone Repository: In whatever directory you like, execute:
 
-```git clone https://github.com/runtimeverification/RV-Log.git```
+  ```git clone https://github.com/runtimeverification/RV-Log.git```
 
 2. Build: In the top directory of the RV-Log project, execute the command:
 
@@ -43,11 +43,11 @@ Currently, the only option for setting up the tool is building from source.
 
 1. Inside the directory which contains the rvm specification, execute the command: 
 
-```rv-log YourRVM-Spec.rvm [-liveness]```
+  ```rv-log YourRVM-Spec.rvm [-liveness]```
 
-   The option `-liveness` is used when the user wants to monitor liveness property, in
-   which case the mechanism for handling violations need to be defined in rvm specification;
-   and the method `printAllViolations()` needs to be defined in the specification.
+  The option `-liveness` is used when the user wants to monitor liveness property, in
+which case the mechanism for handling violations need to be defined in rvm specification;
+and the method `printAllViolations()` needs to be defined in the specification.
 
 2. The specialized log reader which is able to monitor the log file with
 pre-defined events will be generated in folder `/CustomizedLogReader`
