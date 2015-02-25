@@ -15,21 +15,21 @@
     </dependencySets>
 
     <fileSets>
-		<fileSet>
+        <fileSet>
             <directory>.</directory>
             <outputDirectory>/</outputDirectory>
 
-			<excludes>
-				<exclude> %regex[.*\.bak] </exclude>
-				<exclude> %regex[.*~] </exclude>
-			</excludes>
+            <excludes>
+                <exclude>%regex[.*\.bak]</exclude>
+                <exclude>%regex[.*~]</exclude>
+            </excludes>
 
             <includes>
                 <include>LICENSE*</include>
                 <include>README*</include>
                 <include>INSTALL*</include>
                 <include>config/**</include>
-				<include>examples/**</include>
+                <include>examples/**</include>
             </includes>
 
         </fileSet>

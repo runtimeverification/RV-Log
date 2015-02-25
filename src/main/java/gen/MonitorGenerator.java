@@ -6,7 +6,6 @@ import util.Utils;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.List;
 
 import static sig.SignatureFormulaExtractor.SigExtractor;
 

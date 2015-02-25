@@ -1,9 +1,7 @@
 package formula;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static sig.SignatureFormulaExtractor.SigExtractor;
 
