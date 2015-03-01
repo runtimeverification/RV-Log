@@ -5,6 +5,7 @@ import com.runtimeverification.rvmonitor.core.ast.MonitorFile;
 import com.runtimeverification.rvmonitor.core.ast.Property;
 import com.runtimeverification.rvmonitor.core.ast.Specification;
 import com.runtimeverification.rvmonitor.core.parser.RVParser;
+import com.runtimeverification.rvmonitor.java.rvj.JavaParserAdapter;
 import reg.RegHelper;
 
 import java.io.IOException;
@@ -171,6 +172,13 @@ public class SignatureFormulaExtractor {
         this.reset();
 
         String fileContent = new String(Files.readAllBytes(file));
+        List<String> listOfRawMonitoringCode = JavaParserAdapter.getRawMonitoringCode(fileContent);
+        //remove the raw monitoring code from the rvm spec so that it can be handled by rv-parser
+        for (int i = 0; i < listOfRawMonitoringCode.size(); i++) {
+            String rawCode = listOfRawMonitoringCode.get(i);
+            fileContent = fileContent.replace("raw:" + rawCode, "");
+        }
+
         final Reader source = new StringReader(fileContent);
         final MonitorFile monitorFile = RVParser.parse(source);
 

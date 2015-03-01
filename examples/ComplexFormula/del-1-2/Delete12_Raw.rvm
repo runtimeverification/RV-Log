@@ -65,44 +65,51 @@ Delete12() {
         }
     }
 
-event delete (String user,String db,String p,String data) 
-{
-            if (data.equals("unknown"))
+event delete (String user,String db,String p,String data) {boolean delete = true; boolean insert = false;}
+
+
+event insert (String user,String db,String p,String data) {boolean delete = false; boolean insert = true;}
+
+
+raw:
+    if (delete) {
+        if (data.equals("unknown"))
                 return true;
 
-            if (db.equals("db1")) {
-                this.suspiciousRecords.add(new DeleteRecord(LogEntryExtractor.TimeStamp, user, data));
+        if (db.equals("db1")) {
+            this.suspiciousRecords.add(new DeleteRecord(LogEntryExtractor.TimeStamp, user, data));
 
-                if (db2InsertedData.contains(data))
-                    return true;
+            if (db2InsertedData.contains(data))
+                return true;
 
-                else {
-                    if (db1InsertedData.contains(data)) {
-                        Set<String> dataList = this.cond2HasHopeDataList.get(LogEntryExtractor.TimeStamp);
-                        if (dataList == null) {
-                            dataList = new HashSet<>();
-                            this.cond2HasHopeDataList.put(LogEntryExtractor.TimeStamp, dataList);
-                        }
-
-                        dataList.add(data);
+            else {
+                if (db1InsertedData.contains(data)) {
+                    Set<String> dataList = this.cond2HasHopeDataList.get(LogEntryExtractor.TimeStamp);
+                    if (dataList == null) {
+                        dataList = new HashSet<>();
+                        this.cond2HasHopeDataList.put(LogEntryExtractor.TimeStamp, dataList);
                     }
+
+                    dataList.add(data);
                 }
-            } else if (db.equals("db2")) {
-                this.removeValidatedRecords(data);
-            }
+	    }
+          
+        } else if (db.equals("db2")) {
+            this.removeValidatedRecords(data);
+        }             
+    }
 
-}
-
-
-event insert (String user,String db,String p,String data) {
-	if (data.equals("unknown"))
+    if (insert) {
+	    if (data.equals("unknown"))
                 return false;
 
             if (db.equals("db1")) {
                 this.db1InsertedData.add(data);
-            } else if (db.equals("db2")) {
+            }   else if (db.equals("db2")) {
                 this.db2InsertedData.add(data);
             }
-}
+    }
 
 }
+
+
