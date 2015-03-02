@@ -174,9 +174,10 @@ public class SignatureFormulaExtractor {
         String fileContent = new String(Files.readAllBytes(file));
         List<String> listOfRawMonitoringCode = JavaParserAdapter.getRawMonitoringCode(fileContent);
         //remove the raw monitoring code from the rvm spec so that it can be handled by rv-parser
+        fileContent = fileContent.replaceAll("raw\\s*:", "");
         for (int i = 0; i < listOfRawMonitoringCode.size(); i++) {
             String rawCode = listOfRawMonitoringCode.get(i);
-            fileContent = fileContent.replace("raw:" + rawCode, "");
+            fileContent = fileContent.replace(rawCode, "");
         }
 
         final Reader source = new StringReader(fileContent);
