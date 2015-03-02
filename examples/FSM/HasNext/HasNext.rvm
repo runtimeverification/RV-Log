@@ -1,0 +1,47 @@
+package rvm;
+import java.io.*;
+import java.util.*;
+
+// This property specifies that a program does
+// not call the hasnext method  before the next
+// method of an iterator. 
+// This property is borrowed from tracematches 
+// (see ECOOP'07 http://abc.comlab.ox.ac.uk/papers)
+// This example is implemented using raw monitor
+
+full-binding HasNext(Iterator i) {
+   private static enum State {
+       Start, Safe, Unsafe
+   }
+
+   private State curState = State.Start;
+   event hasnext(Iterator i) {
+     this.curState = State.Safe;
+   } // after
+   event next(Iterator i) {
+       switch (curState) {
+           case Start: this.curState = State.Unsafe;
+               break;
+
+           case Safe: this.curState = State.Start;
+               break;
+
+           case Unsafe: this.curState = State.Unsafe;
+               break;
+       }
+   } // before
+
+   raw :
+           if (this.curState == State.Unsafe) {
+           System.out.println("next called without hasNext!");
+           }
+}
+
+
+
+
+
+
+
+
+
