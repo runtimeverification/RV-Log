@@ -1,0 +1,14 @@
+To make it compile, a temporal fix is:
+
+at the beginning of event methods (deleteEvent and insertEvent)
+in Delete12_RawRuntimeMonitor class, insert:
+
+            if (Delete12_RawRawMonitor.indexMap.get(data) == null) {
+                Delete12_RawRawMonitor.indexMap.put(data,data);
+            } else
+            data = Delete12_RawRawMonitor.indexMap.get(data);
+
+change the access modifer of the mapofmonitor field from private to protected.
+
+protected static final MapOfMonitor<Delete12_RawRawMonitor> Delete12_Raw_data_Map
+= new MapOfMonitor<Delete12_RawRawMonitor>(0) ;

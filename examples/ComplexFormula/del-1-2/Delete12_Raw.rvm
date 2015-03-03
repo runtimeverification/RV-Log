@@ -11,7 +11,7 @@ import java.util.HashSet;
 Delete12_Raw(String data){
 
 // in order to traverse the remaining monitors at the end, keep a strong ref (temporal fix)
-private static Set<String> strongRefSet = new HashSet<>();
+protected static HashMap<String,String> indexMap = new HashMap<>();
 
 private static enum State {
     //C1 is the first condition on the r.h.s of the implication
@@ -92,9 +92,9 @@ public static class DeleteRecord implements Comparable<DeleteRecord> {
     public static void printAllViolations() {
         ArrayList<DeleteRecord> listOfViolations = new ArrayList<>();
 
-        for (String ref : strongRefSet) {
+        for (String ref :  indexMap.keySet()) {
             Delete12_RawRawMonitor monitor = Delete12_RawRuntimeMonitor.Delete12_Raw_data_Map.getNodeWithStrongRef(ref);
-            if (monitor.curState != State.Start) {
+            if (monitor != null && monitor.curState != State.Start) {
                 listOfViolations.add(new DeleteRecord(monitor.ts, monitor.user, ref));
             }
         }
@@ -119,8 +119,6 @@ public static class DeleteRecord implements Comparable<DeleteRecord> {
         if (db.equals("db1")) {
             accurateEvents[0] = true;
 
-            strongRefSet.add(data);
-
             this.ts = LogEntryExtractor.TimeStamp;
             this.user = user;
 
@@ -135,8 +133,6 @@ public static class DeleteRecord implements Comparable<DeleteRecord> {
     event insert(String user,String db,String p,String data) {
         if (data.equals("unknown"))
             return true;
-
-        strongRefSet.add(data);
 
         if (db.equals("db1")) {
             accurateEvents[3] = true; //cond 2-1 begins to hold
@@ -240,7 +236,7 @@ raw:
 
         if (this.curState == State.Unsafe || this.curState == State.Safe){
             this.resetState();
-            strongRefSet.remove(data);
+            indexMap.remove(data);
         }
 
 
