@@ -1,6 +1,7 @@
 package rvm;
 
 import rvm.LogEntryExtractor;
+import rvm.LogReader;
 
 import java.lang.Comparable;
 import java.lang.Override;
@@ -8,6 +9,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 Delete12_Raw(String data){
+
+// in order to traverse the remaining monitors at the end, keep a strong ref (temporal fix)
+private static Set<String> strongRefSet = new HashSet<>();
 
 private static enum State {
     //C1 is the first condition on the r.h.s of the implication
@@ -17,7 +21,9 @@ private static enum State {
     C2Fail, C1Fail_AND_C2_1Pass, C1Fail_AND_C2_2Pass
 }
 
-private State curState = State.Start;
+    private State curState = State.Start;
+    private long ts;
+    private String user;
 
 /**
  * Base on the values of the events' arguments, the monitor's state may be updated to different
@@ -82,13 +88,26 @@ public static class DeleteRecord implements Comparable<DeleteRecord> {
     }
 }
 
-private static List<DeleteRecord> violations = new ArrayList<>();
-
-
 
     public static void printAllViolations() {
-        for (int i = 0; i < violations.size(); i++) {
-            System.out.println(violations.get(i).print());
+        ArrayList<DeleteRecord> listOfViolations = new ArrayList<>();
+
+        for (String ref : strongRefSet) {
+            Delete12_RawRawMonitor monitor = Delete12_RawRuntimeMonitor.Delete12_Raw_data_Map.getNodeWithStrongRef(ref);
+            if (monitor.curState != State.Start) {
+                listOfViolations.add(new DeleteRecord(monitor.ts, monitor.user, ref));
+            }
+        }
+
+        listOfViolations.sort(new Comparator<DeleteRecord>() {
+            @Override
+            public int compare(DeleteRecord o1, DeleteRecord o2) {
+                return (int) (o1.ts - o2.ts);
+            }
+        });
+
+        for (int i = 0; i < listOfViolations.size(); i++) {
+            System.out.println(listOfViolations.get(i).print());
         }
     }
 
@@ -96,8 +115,15 @@ private static List<DeleteRecord> violations = new ArrayList<>();
         if (data.equals("unknown")) //Unknown data does not affect the state of monitor at all
             return true;
 
+
         if (db.equals("db1")) {
             accurateEvents[0] = true;
+
+            strongRefSet.add(data);
+
+            this.ts = LogEntryExtractor.TimeStamp;
+            this.user = user;
+
         } else if (db.equals("db2")) {
             accurateEvents[1] = true;
         } else {
@@ -107,6 +133,10 @@ private static List<DeleteRecord> violations = new ArrayList<>();
 
 
     event insert(String user,String db,String p,String data) {
+        if (data.equals("unknown"))
+            return true;
+
+        strongRefSet.add(data);
 
         if (db.equals("db1")) {
             accurateEvents[3] = true; //cond 2-1 begins to hold
@@ -204,10 +234,14 @@ raw:
 
         // record the violation entry
         if (this.curState == State.Unsafe)
-        violations.add(new DeleteRecord(LogEntryExtractor.TimeStamp, user, data));
+            System.out.println("@" + LogEntryExtractor.TimeStamp + " delete (" + user + ", db1, " +
+            data + ")");
 
-        if (this.curState == State.Unsafe || this.curState == State.Safe)
-        this.resetState();
+
+        if (this.curState == State.Unsafe || this.curState == State.Safe){
+            this.resetState();
+            strongRefSet.remove(data);
+        }
 
 
 }
