@@ -1,0 +1,2 @@
+There are 4 log entries in the log file!!!
+Violation: @12 delete (user2, db1, someData)
