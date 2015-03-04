@@ -21,3 +21,7 @@ insert(user3, db2, p, someData2)
 
 delete(user3, db2, p2, someData2)
 
+
+@22
+delete(peter, db1, p, fake)
+

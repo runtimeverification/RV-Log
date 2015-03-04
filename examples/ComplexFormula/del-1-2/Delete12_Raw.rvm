@@ -10,20 +10,22 @@ import java.util.HashSet;
 
 Delete12_Raw(String data){
 
-// in order to traverse the remaining monitors at the end, keep a strong ref (temporal fix)
+//cache the index of monitors to achieve indexing by value (temporal fix)
 protected static HashMap<String,String> indexMap = new HashMap<>();
+private State curState = State.Start;
+private long ts;
+private String user;
+private boolean e4Holds;
+private boolean e7Holds;
 
 private static enum State {
     //C1 is the first condition on the r.h.s of the implication
     //C2_1, C2_2 refer the two sub-formulas inside the second condition
+    //The order of these states should NOT be changed.
     Start, Check, Unsafe, Safe,
     C1Fail, C2_1Pass, C2_2Pass,
     C2Fail, C1Fail_AND_C2_1Pass, C1Fail_AND_C2_2Pass
 }
-
-    private State curState = State.Start;
-    private long ts;
-    private String user;
 
 /**
  * Base on the values of the events' arguments, the monitor's state may be updated to different
@@ -32,26 +34,42 @@ private static enum State {
  * transition functions.
  * <p/>
  * Different accurate events are described here:
- * 0: the event that makes monitor enter Check state.
- * 1: the event that makes C1 hold.
- * 2: the event that makes C1 NOT hold.
- * 3: the event that makes C2_1 hold.
- * 4: the event that makes C2_1 NOT hold.
- * 5: the event that makes C2_2 hold.
- * 6: the event that makes C2_2 NOT hold.
+ * E1: the event that makes monitor enter State.Check state.
+ * E2: the event that makes C1 hold.
+ * E3: the event that makes C1 NOT hold.
+ * E4: the event that makes C2_1 hold.
+ * E5: the event that makes C2_1 NOT hold.
+ * E6: the event that makes C2_2 hold.
+ * E7: the event that makes C2_2 NOT hold.
+ * The int arrays with name 'Ei' below are transition functions.
+ * For example, array E1 is in fact a function that maps its index (input state) to value
+ * (output state resulting from updating input state via event E1).
  */
-private boolean[] accurateEvents = new boolean[7];
+private static State[] E1 = new State[]{State.Check,State.Check,State.Unsafe,State.Safe,State.C1Fail,State.C2_1Pass,State.C2_2Pass,State.C2Fail,
+        State.C1Fail_AND_C2_1Pass,State.C1Fail_AND_C2_2Pass};
+
+private static State[] E2 = new State[]{State.Start,State.Safe,State.Unsafe,State.Safe,State.Safe,State.Safe,State.Safe,State.Safe,State.Safe,State.Safe};
+
+private static State[] E3 = new State[]{State.Start,State.C1Fail,State.Unsafe,State.Safe,State.C1Fail,State.C1Fail_AND_C2_1Pass,
+        State.C1Fail_AND_C2_2Pass,State.Unsafe,State.C1Fail_AND_C2_1Pass,State.C1Fail_AND_C2_2Pass};
+
+private static State[] E4 = new State[]{State.Start,State.C2_1Pass,State.Unsafe,State.Safe,State.C1Fail_AND_C2_1Pass,State.C2_1Pass,
+        State.Safe,State.C2Fail,State.C1Fail_AND_C2_1Pass,State.Safe};
+
+private static State[] E5 = new State[]{State.Start,State.C2Fail,State.Unsafe,State.Safe,State.Unsafe,State.C2Fail,State.C2Fail,
+        State.C2Fail,State.Unsafe,State.Unsafe};
+
+private static State[] E6 = new State[]{State.Start,State.C2_2Pass,State.Unsafe,State.Safe,State.C1Fail_AND_C2_2Pass,State.Safe,
+        State.C2_2Pass,State.C2Fail,State.Safe,State.C1Fail_AND_C2_2Pass};
+
+private static State[] E7 = new State[]{State.Start,State.C2Fail,State.Unsafe,State.Safe,State.Unsafe,State.C2Fail,State.C2Fail,
+        State.C2Fail,State.Unsafe,State.Unsafe};
 
 
-    private void resetState() {
-        this.curState = State.Start;
-        for (int i = 0; i < accurateEvents.length; i++) {
-            if (i == 3 || i == 6)
-                continue;
 
-            this.accurateEvents[i] = false;
-        }
-    }
+ private void resetState() {
+    this.curState = State.Start;
+ }
 
 
 /**
@@ -117,13 +135,15 @@ public static class DeleteRecord implements Comparable<DeleteRecord> {
 
 
         if (db.equals("db1")) {
-            accurateEvents[0] = true;
+            //E1 occurs
+            this.curState = E1[this.curState.ordinal()];
 
             this.ts = LogEntryExtractor.TimeStamp;
             this.user = user;
 
         } else if (db.equals("db2")) {
-            accurateEvents[1] = true;
+            //E2 occurs
+            this.curState = E2[this.curState.ordinal()];
         } else {
         }
 
@@ -135,111 +155,32 @@ public static class DeleteRecord implements Comparable<DeleteRecord> {
             return true;
 
         if (db.equals("db1")) {
-            accurateEvents[3] = true; //cond 2-1 begins to hold
+            //E4 occurs, cond 2-1 begins to hold
+            this.curState = E4[this.curState.ordinal()];
+            this.e4Holds = true;
         } else if (db.equals("db2")) {
-            accurateEvents[6] = true; //cond 2-2 does not hold now
+            //E7 occurs, cond 2-2 does not hold now
+            this.curState = E7[this.curState.ordinal()];
+            this.e7Holds = true;
         }
-
     }
 
 raw:
-    switch(this.curState){
-        case Start:
-        if(this.accurateEvents[0]){ //enter check state and check the past conditions
-        this.curState=State.Check;
-
-        if(this.accurateEvents[3])
-        this.curState=State.C2_1Pass;
-
-        else if(this.accurateEvents[4])
-        this.curState=State.C2Fail;
-
-        else if(this.accurateEvents[5])
-        this.curState=State.C2_2Pass;
-
-        else if(this.accurateEvents[6])
-        this.curState=State.C2Fail;
+        if (this.e4Holds) {
+            this.curState = E4[this.curState.ordinal()];
         }
 
-        break;
-
-        case Check:
-        if(this.accurateEvents[1])
-        this.curState=State.Safe;
-
-        else if(this.accurateEvents[2])
-        this.curState=State.C1Fail;
-
-        break;
-
-        case C1Fail:
-        if(this.accurateEvents[3])
-        this.curState=State.C1Fail_AND_C2_1Pass;
-
-        else if(this.accurateEvents[5])
-        this.curState=State.C1Fail_AND_C2_2Pass;
-
-        else if(this.accurateEvents[4]||this.accurateEvents[6])
-        // C2_1 or C2_2 fails implies C2 fails
-        this.curState=State.Unsafe;
-        break;
-
-        case C2_1Pass:
-        if(this.accurateEvents[5])
-        this.curState=State.Safe;
-
-        else if(this.accurateEvents[6])
-        this.curState=State.C2Fail;
-        break;
-
-        case C2_2Pass:
-        if(this.accurateEvents[3])
-        this.curState=State.Safe;
-
-        else if(this.accurateEvents[4])
-        this.curState=State.C2Fail;
-
-        break;
-
-        case C2Fail:
-        if(this.accurateEvents[2])
-        this.curState=State.Unsafe;
-
-        else if(this.accurateEvents[1])
-        this.curState=State.Safe;
-
-        break;
-
-        case C1Fail_AND_C2_1Pass:
-        if(this.accurateEvents[5])
-        this.curState=State.Safe;
-
-        else if(this.accurateEvents[6])
-        this.curState=State.Unsafe;
-
-        break;
-
-        case C1Fail_AND_C2_2Pass:
-        if(this.accurateEvents[3])
-        this.curState=State.Safe;
-
-        else if(this.accurateEvents[4])
-        this.curState=State.Unsafe;
-        break;
-    }
-
+        if (this.e7Holds) {
+            this.curState = E7[this.curState.ordinal()];
+        }
         // record the violation entry
         if (this.curState == State.Unsafe)
             System.out.println("@" + LogEntryExtractor.TimeStamp + " delete (" + user + ", db1, " +
             data + ")");
 
-
         if (this.curState == State.Unsafe || this.curState == State.Safe){
             this.resetState();
-            indexMap.remove(data);
         }
-
-
 }
 
 
