@@ -1,0 +1,5 @@
+There are 5 log entries in the log file!!!
+@12 delete (user2, db1, someData)
+
+@22 delete (peter, db1, fake)
+
