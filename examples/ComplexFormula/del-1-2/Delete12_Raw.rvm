@@ -45,24 +45,31 @@ private static enum State {
  * For example, array E1 is in fact a function that maps its index (input state) to value
  * (output state resulting from updating input state via event E1).
  */
-private static State[] E1 = new State[]{State.Check,State.Check,State.Unsafe,State.Safe,State.C1Fail,State.C2_1Pass,State.C2_2Pass,State.C2Fail,
+private static State[] E1 = new State[]{State.Check,State.Check,State.Unsafe,State.Safe,State.C1Fail,
+        State.C2_1Pass,State.C2_2Pass,State.C2Fail,
         State.C1Fail_AND_C2_1Pass,State.C1Fail_AND_C2_2Pass};
 
-private static State[] E2 = new State[]{State.Start,State.Safe,State.Unsafe,State.Safe,State.Safe,State.Safe,State.Safe,State.Safe,State.Safe,State.Safe};
+private static State[] E2 = new State[]{State.Start,State.Safe,State.Unsafe,State.Safe,State.Safe,
+        State.Safe,State.Safe,State.Safe,State.Safe,State.Safe};
 
-private static State[] E3 = new State[]{State.Start,State.C1Fail,State.Unsafe,State.Safe,State.C1Fail,State.C1Fail_AND_C2_1Pass,
+private static State[] E3 = new State[]{State.Start,State.C1Fail,State.Unsafe,State.Safe,
+        State.C1Fail,State.C1Fail_AND_C2_1Pass,
         State.C1Fail_AND_C2_2Pass,State.Unsafe,State.C1Fail_AND_C2_1Pass,State.C1Fail_AND_C2_2Pass};
 
-private static State[] E4 = new State[]{State.Start,State.C2_1Pass,State.Unsafe,State.Safe,State.C1Fail_AND_C2_1Pass,State.C2_1Pass,
+private static State[] E4 = new State[]{State.Start,State.C2_1Pass,State.Unsafe,State.Safe,
+        State.C1Fail_AND_C2_1Pass,State.C2_1Pass,
         State.Safe,State.C2Fail,State.C1Fail_AND_C2_1Pass,State.Safe};
 
-private static State[] E5 = new State[]{State.Start,State.C2Fail,State.Unsafe,State.Safe,State.Unsafe,State.C2Fail,State.C2Fail,
+private static State[] E5 = new State[]{State.Start,State.C2Fail,State.Unsafe,State.Safe,
+        State.Unsafe,State.C2Fail,State.C2Fail,
         State.C2Fail,State.Unsafe,State.Unsafe};
 
-private static State[] E6 = new State[]{State.Start,State.C2_2Pass,State.Unsafe,State.Safe,State.C1Fail_AND_C2_2Pass,State.Safe,
+private static State[] E6 = new State[]{State.Start,State.C2_2Pass,State.Unsafe,State.Safe,
+        State.C1Fail_AND_C2_2Pass,State.Safe,
         State.C2_2Pass,State.C2Fail,State.Safe,State.C1Fail_AND_C2_2Pass};
 
-private static State[] E7 = new State[]{State.Start,State.C2Fail,State.Unsafe,State.Safe,State.Unsafe,State.C2Fail,State.C2Fail,
+private static State[] E7 = new State[]{State.Start,State.C2Fail,State.Unsafe,State.Safe,
+        State.Unsafe,State.C2Fail,State.C2Fail,
         State.C2Fail,State.Unsafe,State.Unsafe};
 
 
@@ -111,7 +118,8 @@ public static class DeleteRecord implements Comparable<DeleteRecord> {
         ArrayList<DeleteRecord> listOfViolations = new ArrayList<>();
 
         for (String ref :  indexMap.keySet()) {
-            Delete12_RawRawMonitor monitor = Delete12_RawRuntimeMonitor.Delete12_Raw_data_Map.getNodeWithStrongRef(ref);
+            Delete12_RawRawMonitor monitor = Delete12_RawRuntimeMonitor.Delete12_Raw_data_Map
+                                                .getNodeWithStrongRef(ref);
             if (monitor != null && monitor.curState != State.Start) {
                 listOfViolations.add(new DeleteRecord(monitor.ts, monitor.user, ref));
             }
