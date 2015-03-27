@@ -44,12 +44,23 @@ public class Main {
      * @throws InvocationTargetException
      */
     public static void main(String[] args) throws IOException {
+        Path path2SigFile = null;
+
         genLogReaderPath = initOutputFile();
 
-        if (args.length > 1 && args[1].equals("-liveness")) {
-            IsMonitoringLivenessProperty = true;
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-liveness"))
+                IsMonitoringLivenessProperty = true;
+
+            else if (args[i].equals("--format=monpoly"))
+                FORMAT = MONPOLY;
+
+            else
+                path2SigFile = Paths.get(args[i]);
         }
-        Path path2SigFile = Paths.get(args[0]);
+
+
         String tmpFolder = "./CodeModel_tmp";
         InvokerGenerator invokerGenerator = new InvokerGenerator(tmpFolder);
         SignatureFormulaExtractor.EventsInfo eventsInfo = SignatureFormulaExtractor.SigExtractor.
