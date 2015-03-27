@@ -143,7 +143,7 @@ public class InvokerGenerator {
     }
 
     private void initTableInfoMethod(JDefinedClass logReaderClass, HashMap<String, int[]> tableSchema) {
-        JType tableSchemaType = CodeModel.ref(HashMap.class).narrow(String.class, int[].class);
+        JType tableSchemaType = CodeModel.ref(HashMap.class).narrow(String.class, Integer.class);
         JMethod initTableColMethod = logReaderClass.method(JMod.PRIVATE | JMod.STATIC, tableSchemaType, "initMethodInfo");
 
         JInvocation initMethodInvok = logReaderClass.staticInvoke(initTableColMethod);
@@ -154,15 +154,11 @@ public class InvokerGenerator {
         JVar tmpTable = body.decl(tableSchemaType, "methodInfoTable", initTableExpr);
 
         for (String eventName : tableSchema.keySet()) {
-            int[] colTypes = tableSchema.get(eventName);
-            JArray typeArrExp = JExpr.newArray(CodeModel.INT);
-            for (int i = 0; i < colTypes.length; i++) {
-                typeArrExp.add(JExpr.lit(colTypes[i]));
-            }
+            JExpression numOfArgsExpr = JExpr.lit(tableSchema.get(eventName).length);
 
             JInvocation putMethodInvok = body.invoke(tmpTable, "put");
             putMethodInvok.arg(eventName);
-            putMethodInvok.arg(typeArrExp);
+            putMethodInvok.arg(numOfArgsExpr);
         }
         body._return(tmpTable);
     }
@@ -192,7 +188,7 @@ public class InvokerGenerator {
         String objArrListStr = "violationsInCurLogEntry";
 
         JVar eventNameParam = method.param(String.class, eventNameStr);
-        JVar tupleData = method.param(Object[].class, methodArgsStr);
+        JVar tupleData = method.param(String[].class, methodArgsStr);
 
         JType objArrListTy = CodeModel.ref(List.class).narrow(Object[].class);
         JVar violationsInCurLogEntry = Main.IsMonitoringLivenessProperty
@@ -226,15 +222,19 @@ public class InvokerGenerator {
                 JExpression index = JExpr.lit(i);
                 switch (cols[i]) {
                     case RegHelper.INT_TYPE:
-                        JType intTy = CodeModel.directClass("Integer");
-                        JExpression intArg = JExpr.cast(intTy, tupleData.component(index));
-                        eventMethodInvok.arg(intArg);
+                        JClass integerCls = CodeModel.directClass("Integer");
+                        JInvocation parseIntMethInvok = integerCls.staticInvoke("parseInt");
+                        parseIntMethInvok.arg(tupleData.component(index));
+
+                        eventMethodInvok.arg(parseIntMethInvok);
                         break;
 
                     case RegHelper.FLOAT_TYPE:
-                        JType floatTy = CodeModel.directClass("Double");
-                        JExpression floatArg = JExpr.cast(floatTy, tupleData.component(index));
-                        eventMethodInvok.arg(floatArg);
+                        JClass doubleCls = CodeModel.directClass("Double");
+                        JInvocation parseDoubleMethInvok = doubleCls.staticInvoke("parseDouble");
+                        parseDoubleMethInvok.arg(tupleData.component(index));
+
+                        eventMethodInvok.arg(parseDoubleMethInvok);
                         break;
 
                     case RegHelper.STRING_TYPE:

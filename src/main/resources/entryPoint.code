@@ -15,13 +15,14 @@
     public static interface LogExtractor {
         public void startReadingEventsByteByByte() throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException;
     }
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws Exception {
         assert args.length == 1 && args[0].endsWith(".log") :
                 "The only argument needed is the log file (with .log suffix).";
 
         initOutputFile();
 
         Path path2Log = path2Log = Paths.get(args[0]);
-        LogEntryExtractor lee = new LogEntryExtractor(methodInfo, path2Log, 6);
+        //LogExtractor lee = new LogEntryExtractor(methodInfo, path2Log, 6);
+        LogExtractor lee = new LogEntryExtractor_CSV(methodInfo, path2Log, 6);
         lee.startReadingEventsByteByByte();
     }

@@ -12,10 +12,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
+    public static final String CSV = "CSV";
+    public static final String MONPOLY = "MON";
+
+
     public static boolean IsMonitoringLivenessProperty;
     public static Path genLogReaderPath;
     private static ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static String OutPutFilePath = "./CustomizedLogReader/rvm/LogReader.java";
+    private static String FORMAT = CSV;
 
     public static String getContentFromResource(String resourceName) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(resourceName)));
@@ -55,8 +60,24 @@ public class Main {
         invokerGenerator.generateCustomizedInvoker(runtimeMonitorName, eventsInfo);
 
         String imports = getContentFromResource("import.code");
-        String mainBody = (IsMonitoringLivenessProperty) ? getContentFromResource("main-outputGenInRVM.code")
-                : getContentFromResource("main.code");
+        String mainBody;
+        switch (FORMAT) {
+            case CSV :
+                if (IsMonitoringLivenessProperty)
+                    throw new IOException("Does not support liveness property in CSV format");
+
+                mainBody = getContentFromResource("main-csv.code");
+                break;
+
+            case MONPOLY :
+                mainBody = (IsMonitoringLivenessProperty) ? getContentFromResource
+                        ("main-outputGenInRVM.code")
+                        : getContentFromResource("main-monpoly.code");
+                break;
+
+            default :
+                throw new IOException("Not support this format!");
+        }
 
         Path tmpFolderPath = Paths.get(tmpFolder + "/LogReader.java");
         String logReader = new String(Files.readAllBytes(tmpFolderPath));

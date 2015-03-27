@@ -1,0 +1,19 @@
+package rvm;
+
+Pub(Integer report) {
+public static boolean hasViolation;
+
+  event publish (Integer report) {
+		
+	} 
+
+  event approve (Integer report) {
+
+	}
+
+ 
+  ltl: [](publish => <*> approve)
+
+  @violation {
+  hasViolation = true;}
+}
