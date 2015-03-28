@@ -360,14 +360,6 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
      */
     private void readLine() throws IOException {
         EventName = this.getString();
-
-        //finally we can have two version of the log reader.
-        //if the strict option is on, then use this version, otherwise, there will be
-        //no such check like the one at below...
-//        if (!this.eventArgsMap.keySet().contains(EventName) && LogReader.strictLogReader) {
-//            throw new IOException("Unknown event " + EventName);
-//        }
-
         if (LogReader.isMonitoredEvent(EventName)) {
             String[] argsOfMeth = new String[this.eventArgsMap.get(EventName)];
             for (int i = 0; i < argsOfMeth.length - 1; i++) {
