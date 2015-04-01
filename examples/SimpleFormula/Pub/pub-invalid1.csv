@@ -1,7 +1,4 @@
 event, reportID
 approve ,500
 publish, 500
-approve, 700
-approve, 200
 publish, 700
-good, 12
