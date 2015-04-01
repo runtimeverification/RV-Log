@@ -15,12 +15,13 @@ public class Main {
     public static final String CSV = "CSV";
     public static final String MONPOLY = "MON";
 
-
     public static boolean IsMonitoringLivenessProperty;
     public static Path genLogReaderPath;
     private static ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static String OutPutFilePath = "./CustomizedLogReader/rvm/LogReader.java";
     private static String FORMAT = CSV;
+    private static boolean strictParsing;
+    private static String insertPoint4EventNameChecks = "        if (LogReader.isMonitoredEvent(EventName)) {";
 
     public static String getContentFromResource(String resourceName) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(resourceName)));
@@ -56,9 +57,13 @@ public class Main {
             else if (args[i].equals("--format=monpoly"))
                 FORMAT = MONPOLY;
 
+            else if (args[i].equals("--strict"))
+                strictParsing = true;
             else
                 path2SigFile = Paths.get(args[i]);
         }
+        if (path2SigFile == null)
+            throw new IOException("Please provide one .rvm specification file.");
 
 
         String tmpFolder = "./CodeModel_tmp";
@@ -78,6 +83,12 @@ public class Main {
                     throw new IOException("Does not support liveness property in CSV format");
 
                 mainBody = getContentFromResource("main-csv.code");
+                if (strictParsing) {
+                    int insertPoint = mainBody.indexOf(insertPoint4EventNameChecks);
+                    mainBody = mainBody.substring(0, insertPoint)
+                            + "\r\n" +  getContentFromResource("eventNameChecks.code") +
+                            mainBody.substring(insertPoint);
+                }
                 break;
 
             case MONPOLY :
