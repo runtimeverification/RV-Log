@@ -12,10 +12,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
+    public static final String CSV = "CSV";
+    public static final String MONPOLY = "MON";
+
     public static boolean IsMonitoringLivenessProperty;
     public static Path genLogReaderPath;
     private static ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static String OutPutFilePath = "./CustomizedLogReader/rvm/LogReader.java";
+    private static String FORMAT = CSV;
+    private static boolean strictParsing;
+    private static String insertPoint4EventNameChecks = "        if (LogReader.isMonitoredEvent(EventName)) {";
 
     public static String getContentFromResource(String resourceName) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(resourceName)));
@@ -39,12 +45,27 @@ public class Main {
      * @throws InvocationTargetException
      */
     public static void main(String[] args) throws IOException {
+        Path path2SigFile = null;
+
         genLogReaderPath = initOutputFile();
 
-        if (args.length > 1 && args[1].equals("-liveness")) {
-            IsMonitoringLivenessProperty = true;
+
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-liveness"))
+                IsMonitoringLivenessProperty = true;
+
+            else if (args[i].equals("--format=monpoly"))
+                FORMAT = MONPOLY;
+
+            else if (args[i].equals("--strict"))
+                strictParsing = true;
+            else
+                path2SigFile = Paths.get(args[i]);
         }
-        Path path2SigFile = Paths.get(args[0]);
+        if (path2SigFile == null)
+            throw new IOException("Please provide one .rvm specification file.");
+
+
         String tmpFolder = "./CodeModel_tmp";
         InvokerGenerator invokerGenerator = new InvokerGenerator(tmpFolder);
         SignatureFormulaExtractor.EventsInfo eventsInfo = SignatureFormulaExtractor.SigExtractor.
@@ -55,8 +76,30 @@ public class Main {
         invokerGenerator.generateCustomizedInvoker(runtimeMonitorName, eventsInfo);
 
         String imports = getContentFromResource("import.code");
-        String mainBody = (IsMonitoringLivenessProperty) ? getContentFromResource("main-outputGenInRVM.code")
-                : getContentFromResource("main.code");
+        String mainBody;
+        switch (FORMAT) {
+            case CSV :
+                if (IsMonitoringLivenessProperty)
+                    throw new IOException("Does not support liveness property in CSV format");
+
+                mainBody = getContentFromResource("main-csv.code");
+                if (strictParsing) {
+                    int insertPoint = mainBody.indexOf(insertPoint4EventNameChecks);
+                    mainBody = mainBody.substring(0, insertPoint)
+                            + "\r\n" +  getContentFromResource("eventNameChecks.code") +
+                            mainBody.substring(insertPoint);
+                }
+                break;
+
+            case MONPOLY :
+                mainBody = (IsMonitoringLivenessProperty) ? getContentFromResource
+                        ("main-outputGenInRVM.code")
+                        : getContentFromResource("main-monpoly.code");
+                break;
+
+            default :
+                throw new IOException("Not support this format!");
+        }
 
         Path tmpFolderPath = Paths.get(tmpFolder + "/LogReader.java");
         String logReader = new String(Files.readAllBytes(tmpFolderPath));
