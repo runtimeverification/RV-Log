@@ -368,7 +368,7 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
                 argsOfMeth[i] = curArg;
             }
             argsOfMeth[argsOfMeth.length - 1] = this.getLastArg();
-            this.skipLine();
+            this.rmWhiteSpaceAndComma(false);
 
             LogReader.MonitorMethodsInvoker.invoke(EventName, argsOfMeth, this.violationsInCurLogEntry);
         } else {

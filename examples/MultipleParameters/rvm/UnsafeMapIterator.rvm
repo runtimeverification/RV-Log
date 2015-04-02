@@ -21,7 +21,8 @@ full-binding SafeMapIterator(String map, String c, String i){
        ere:createColl updateMap*createIter useIter*updateMap updateMap*useIter
        @match
        {
-           System.err.println("update map during iteration!\t(map:" + map
+          hasViolation = true;
+	  System.err.println("update map during iteration!\t(map:" + map
            + ", collection:" + c + ", iterator:" + i + ")");
        }
 }
