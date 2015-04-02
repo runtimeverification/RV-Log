@@ -1,0 +1,28 @@
+package rvm;
+full-binding SafeMapIterator(String map, String c, String i){
+       public static boolean hasViolation;
+       private String map;
+       private String c;
+       private String i;
+       event createColl(String map,String c){
+           this.map = map;
+           this.c = c;
+       }
+       event createIter(String c,String i){
+           this.c = c;
+           this.i = i;
+       }
+       event useIter(String i){
+           this.i = i;
+       }
+       event updateMap(String map){
+           this.map = map;
+       }
+       ere:createColl updateMap*createIter useIter*updateMap updateMap*useIter
+       @match
+       {
+          hasViolation = true;
+	  System.err.println("update map during iteration!\t(map:" + map
+           + ", collection:" + c + ", iterator:" + i + ")");
+       }
+}
