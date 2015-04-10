@@ -98,6 +98,18 @@ public class SignatureFormulaExtractor {
                 case "String":
                     argTypes[i] = RegHelper.STRING_TYPE;
                     break;
+
+                case "bool":
+                    argTypes[i] = RegHelper.Bool_Type;
+                    break;
+
+                case "Boolean":
+                    argTypes[i] = RegHelper.Bool_Type;
+                    break;
+
+                default:
+                    System.err.println("Does not support the type " + argI + " now.");
+                    System.exit(0);
             }
         }
         return argTypes;
