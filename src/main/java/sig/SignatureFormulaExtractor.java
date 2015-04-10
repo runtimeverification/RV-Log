@@ -69,22 +69,16 @@ public class SignatureFormulaExtractor {
         }
 
         for (int i = 0; i < argsStrArr.length; i++) {
-            String argI = argsStrArr[i].substring(0, argsStrArr[i].indexOf(' '));
-            switch (argI) {
+            String strI = argsStrArr[i].trim();
+            String typeI = strI.substring(0, strI.indexOf(' '));
+
+            switch (typeI) {
                 case "Integer":
                     argTypes[i] = RegHelper.INT_TYPE;
                     break;
 
                 case "int":
                     argTypes[i] = RegHelper.INT_TYPE;
-                    break;
-
-                case "Float":
-                    argTypes[i] = RegHelper.FLOAT_TYPE;
-                    break;
-
-                case "float":
-                    argTypes[i] = RegHelper.FLOAT_TYPE;
                     break;
 
                 case "Double":
@@ -99,16 +93,16 @@ public class SignatureFormulaExtractor {
                     argTypes[i] = RegHelper.STRING_TYPE;
                     break;
 
-                case "bool":
-                    argTypes[i] = RegHelper.Bool_Type;
-                    break;
-
                 case "Boolean":
                     argTypes[i] = RegHelper.Bool_Type;
                     break;
 
+                case "boolean":
+                    argTypes[i] = RegHelper.Bool_Type;
+                    break;
+
                 default:
-                    System.err.println("Does not support the type " + argI + " now.");
+                    System.err.println("Does not support the type " + typeI + " now.");
                     System.exit(0);
             }
         }
