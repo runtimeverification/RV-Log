@@ -238,9 +238,16 @@ public class InvokerGenerator {
                         break;
 
                     case RegHelper.STRING_TYPE:
-                        JType stringTy = CodeModel.directClass("String");
-                        JExpression stringArg = JExpr.cast(stringTy, tupleData.component(index));
+                        JExpression stringArg = tupleData.component(index);
                         eventMethodInvok.arg(stringArg);
+                        break;
+
+                    case RegHelper.Bool_Type:
+                        JClass booleanCls = CodeModel.directClass("Boolean");
+                        JInvocation parseBoolMethInvok = booleanCls.staticInvoke("parseBoolean");
+                        parseBoolMethInvok.arg(tupleData.component(index));
+
+                        eventMethodInvok.arg(parseBoolMethInvok);
                         break;
                 }
             }
