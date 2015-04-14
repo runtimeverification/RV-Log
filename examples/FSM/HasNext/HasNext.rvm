@@ -9,16 +9,16 @@ import java.util.*;
 // (see ECOOP'07 http://abc.comlab.ox.ac.uk/papers)
 // This example is implemented using raw monitor
 
-full-binding HasNext(Iterator i) {
+full-binding HasNext(Integer i) {
    private static enum State {
        Start, Safe, Unsafe
    }
 
    private State curState = State.Start;
-   event hasnext(Iterator i) {
+   event hasnext(Integer i) {
      this.curState = State.Safe;
    } // after
-   event next(Iterator i) {
+   event next(Integer i) {
        switch (curState) {
            case Start: this.curState = State.Unsafe;
                break;

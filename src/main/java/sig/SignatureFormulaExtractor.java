@@ -153,7 +153,8 @@ public class SignatureFormulaExtractor {
     }
 
     public static void main(String[] args) throws IOException {
-        Path logPath = Paths.get("./test/pub-approve/rvm/Pub.rvm");
+        Path logPath = Paths.get("A:\\Projects\\RV-Log\\target\\release\\RV-Log\\RV-Log" +
+                        "\\examples\\FSM\\HasNext\\HasNext.rvm");
         EventsInfo eventsInfo = SigExtractor.extractEventsInfoFromSigFile(logPath);
 
         printMethodSig(eventsInfo.getTableCol());
@@ -178,6 +179,7 @@ public class SignatureFormulaExtractor {
         this.reset();
 
         String fileContent = new String(Files.readAllBytes(file));
+        fileContent = fileContent.replaceAll("//.*[\n\r]", "");  //remove all comments
         List<String> listOfRawMonitoringCode = JavaParserAdapter.getRawMonitoringCode(fileContent);
         //remove the raw monitoring code from the rvm spec so that it can be handled by rv-parser
         fileContent = fileContent.replaceAll("raw\\s*:", "");
