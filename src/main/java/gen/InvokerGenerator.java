@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
+ * Generate the code for invoking monitor library's methods when events are read from log files.
  * Created by xiaohe on 2/2/15.
  */
 public class InvokerGenerator {
@@ -196,17 +197,6 @@ public class InvokerGenerator {
 
         //gen the body of the method
         JBlock body = method.body();
-
-        JFieldRef[] hasViolation = new JFieldRef[this.ActualMonitorNames.size()];
-
-        if (!Main.IsMonitoringLivenessProperty) {
-            for (int i = 0; i < this.ActualMonitorNames.size(); i++) {
-                String RawMonitorNameI = this.ActualMonitorNames.get(i);
-                hasViolation[i] = CodeModel.ref(RawMonitorNameI).staticRef("hasViolation");
-                body.assign(hasViolation[i], JExpr.lit(false));
-            }
-        }
-
         JSwitch jSwitch = body._switch(eventNameParam);
 
         JClass monitorClass = CodeModel.ref(MonitorName);
@@ -253,15 +243,6 @@ public class InvokerGenerator {
             }
 
             jCase.body()._break();
-        }
-
-        if (!Main.IsMonitoringLivenessProperty) {
-            for (int i = 0; i < this.ActualMonitorNames.size(); i++) {
-                JConditional ifBlock = body._if(hasViolation[i]);
-                JInvocation addViolationStmt = violationsInCurLogEntry.invoke("add");
-                addViolationStmt.arg(tupleData);
-                ifBlock._then().add(addViolationStmt);
-            }
         }
     }
 
