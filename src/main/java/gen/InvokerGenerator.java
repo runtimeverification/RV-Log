@@ -134,9 +134,6 @@ public class InvokerGenerator {
     }
 
     private void initFields(JDefinedClass logReaderClass) {
-        JInvocation getPathFromStrInvok = CodeModel.ref(Paths.class).staticInvoke("get");
-        getPathFromStrInvok.arg(JExpr.lit("./test-out/violation.txt"));
-        logReaderClass.field(JMod.PUBLIC | JMod.STATIC, Path.class, "outputPath", getPathFromStrInvok);
 
         logReaderClass.field(JMod.PROTECTED | JMod.STATIC, int.class, "maxNumOfParams",
                 JExpr.lit(SignatureFormulaExtractor.maxNumOfParams));
@@ -186,14 +183,9 @@ public class InvokerGenerator {
         JMethod method = definedClass.method(JMod.PUBLIC | JMod.STATIC, Void.TYPE, "invoke");
         String eventNameStr = "eventName";
         String methodArgsStr = "data";
-        String objArrListStr = "violationsInCurLogEntry";
 
         JVar eventNameParam = method.param(String.class, eventNameStr);
         JVar tupleData = method.param(String[].class, methodArgsStr);
-
-        JType objArrListTy = CodeModel.ref(List.class).narrow(Object[].class);
-        JVar violationsInCurLogEntry = Main.IsMonitoringLivenessProperty
-                ? null : method.param(objArrListTy, objArrListStr);
 
         //gen the body of the method
         JBlock body = method.body();

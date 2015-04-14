@@ -2,36 +2,35 @@ package rvm;
 
 
 Insert(String user,String db) {
-public static boolean hasViolation;
 
   event insert (String user,String db,String p,String data) {
 	 if (db.equals("db2") && !user.equals("script1")) {
-		hasViolation = true;
+		System.err.println("user " + user + " is not allowed to insert data to db2!");
 	}
 	}
 	 
 }
 
 Pub(Integer report) {
-public static boolean hasViolation;
+  private Integer report;
 
   event publish (Integer report) {
-		
+		this.report = report;	
 	} 
 
   event approve (Integer report) {
-
+		this.report = report;	
 	}
 
  
-  ltl: [](publish => <*> approve)
+  ltl: [](publish => (*) approve)
 
   @violation {
-  hasViolation = true;}
+	  System.err.println("Report " + this.report + " is published without pre-approval!");
+  }
 }
 
 More(String user) {
-public static boolean hasViolation;
 
 event select (String user,String b,String c,String d) {}
 
