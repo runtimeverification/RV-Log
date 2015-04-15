@@ -1,16 +1,3 @@
-    private static void initOutputFile() throws IOException {
-        File file = outputPath.toFile();
-        if (file.exists()) {
-            new PrintWriter(file).close();
-        } else {
-            if (outputPath.getParent().toFile().exists()) {
-                file.createNewFile();
-            } else {
-                outputPath.getParent().toFile().mkdirs();
-                file.createNewFile();
-            }
-        }
-    }
 
     public static interface LogExtractor {
         public void startReadingEventsByteByByte() throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException;
@@ -18,8 +5,6 @@
     public static void main(String[] args) throws Exception {
         assert args.length == 1 && args[0].endsWith(".log") :
                 "The only argument needed is the log file (with .log suffix).";
-
-        initOutputFile();
 
         Path path2Log = path2Log = Paths.get(args[0]);
         //LogExtractor lee = new LogEntryExtractor(methodInfo, path2Log, 6);

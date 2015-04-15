@@ -1,19 +1,20 @@
 package rvm;
 
 Pub(Integer report) {
-public static boolean hasViolation;
+private Integer report;
 
   event publish (Integer report) {
-		
+		this.report = report;	
 	} 
 
   event approve (Integer report) {
-
+		this.report = report;	
 	}
 
  
-  ltl: [](publish => <*> approve)
+  ltl: [](publish => (*) approve)
 
   @violation {
-  hasViolation = true;}
+  System.err.println("Report " + this.report + " is published without pre-approval!");
+  }
 }

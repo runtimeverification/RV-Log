@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.*;
 
 /**
+ * Generate the code for invoking monitor library's methods when events are read from log files.
  * Created by xiaohe on 2/2/15.
  */
 public class InvokerGenerator {
@@ -133,9 +134,6 @@ public class InvokerGenerator {
     }
 
     private void initFields(JDefinedClass logReaderClass) {
-        JInvocation getPathFromStrInvok = CodeModel.ref(Paths.class).staticInvoke("get");
-        getPathFromStrInvok.arg(JExpr.lit("./test-out/violation.txt"));
-        logReaderClass.field(JMod.PUBLIC | JMod.STATIC, Path.class, "outputPath", getPathFromStrInvok);
 
         logReaderClass.field(JMod.PROTECTED | JMod.STATIC, int.class, "maxNumOfParams",
                 JExpr.lit(SignatureFormulaExtractor.maxNumOfParams));
@@ -185,28 +183,12 @@ public class InvokerGenerator {
         JMethod method = definedClass.method(JMod.PUBLIC | JMod.STATIC, Void.TYPE, "invoke");
         String eventNameStr = "eventName";
         String methodArgsStr = "data";
-        String objArrListStr = "violationsInCurLogEntry";
 
         JVar eventNameParam = method.param(String.class, eventNameStr);
         JVar tupleData = method.param(String[].class, methodArgsStr);
 
-        JType objArrListTy = CodeModel.ref(List.class).narrow(Object[].class);
-        JVar violationsInCurLogEntry = Main.IsMonitoringLivenessProperty
-                ? null : method.param(objArrListTy, objArrListStr);
-
         //gen the body of the method
         JBlock body = method.body();
-
-        JFieldRef[] hasViolation = new JFieldRef[this.ActualMonitorNames.size()];
-
-        if (!Main.IsMonitoringLivenessProperty) {
-            for (int i = 0; i < this.ActualMonitorNames.size(); i++) {
-                String RawMonitorNameI = this.ActualMonitorNames.get(i);
-                hasViolation[i] = CodeModel.ref(RawMonitorNameI).staticRef("hasViolation");
-                body.assign(hasViolation[i], JExpr.lit(false));
-            }
-        }
-
         JSwitch jSwitch = body._switch(eventNameParam);
 
         JClass monitorClass = CodeModel.ref(MonitorName);
@@ -253,15 +235,6 @@ public class InvokerGenerator {
             }
 
             jCase.body()._break();
-        }
-
-        if (!Main.IsMonitoringLivenessProperty) {
-            for (int i = 0; i < this.ActualMonitorNames.size(); i++) {
-                JConditional ifBlock = body._if(hasViolation[i]);
-                JInvocation addViolationStmt = violationsInCurLogEntry.invoke("add");
-                addViolationStmt.arg(tupleData);
-                ifBlock._then().add(addViolationStmt);
-            }
         }
     }
 
