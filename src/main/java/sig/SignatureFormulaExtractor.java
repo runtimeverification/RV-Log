@@ -81,6 +81,10 @@ public class SignatureFormulaExtractor {
                     argTypes[i] = RegHelper.INT_TYPE;
                     break;
 
+                case "long":
+                    argTypes[i] = RegHelper.INT_TYPE;
+                    break;
+
                 case "Double":
                     argTypes[i] = RegHelper.FLOAT_TYPE;
                     break;

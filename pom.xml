@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -74,33 +73,67 @@
                     </descriptors>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.16</version>
+                <configuration>
+                    <argLine>
+                        -javaagent:${settings.localRepository}/javamop-agent/javamop-agent/1.0/javamop-agent-1.0.jar
+                        -javaagent:${settings.localRepository}/javamop-agent/javamop-agent/1.0/javamop-agent-1.0.jar
+                    </argLine>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.googlecode.addjars-maven-plugin</groupId>
+                <artifactId>addjars-maven-plugin</artifactId>
+                <version>1.0.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>add-jars</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/lib</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
-    <repositories>
-        <repository>
-            <id>runtime-verification</id>
-            <name>Runtime Verification Repository</name>
-            <url>http://office.runtimeverification.com:8888/repository/internal</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>runtime-verification.snapshots</id>
-            <name>Runtime Verification Snapshot Repository</name>
-            <url>http://office.runtimeverification.com:8888/repository/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
+    <!--
+        <repositories>
+            <repository>
+                <id>runtime-verification</id>
+                <name>Runtime Verification Repository</name>
+                <url>http://office.runtimeverification.com:8888/repository/internal</url>
+                <snapshots>
+                    <enabled>false</enabled>
+                </snapshots>
+                <releases>
+                    <enabled>true</enabled>
+                </releases>
+            </repository>
+            <repository>
+                <id>runtime-verification.snapshots</id>
+                <name>Runtime Verification Snapshot Repository</name>
+                <url>http://office.runtimeverification.com:8888/repository/snapshots</url>
+                <snapshots>
+                    <enabled>true</enabled>
+                </snapshots>
+                <releases>
+                    <enabled>false</enabled>
+                </releases>
+            </repository>
+        </repositories>
+    -->
 
     <dependencies>
         <dependency>
@@ -127,11 +160,9 @@
             <artifactId>codemodel</artifactId>
             <version>2.2.11</version>
         </dependency>
-        <dependency>
-            <groupId>com.runtimeverification.rvmonitor</groupId>
-            <artifactId>rv-monitor</artifactId>
-            <version>1.4-SNAPSHOT</version>
-        </dependency>
+
     </dependencies>
 
+
 </project>
+
