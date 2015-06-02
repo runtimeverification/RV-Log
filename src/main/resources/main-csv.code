@@ -278,6 +278,7 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
     }
 
     public void startReadingEventsByteByByte() throws IOException {
+        boolean readTheHeaderLine = false;
 
         RandomAccessFile aFile = new RandomAccessFile
                 (this.logFilePath, "r");
@@ -293,10 +294,8 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
             this.mbb = inChannel.map(FileChannel.MapMode.READ_ONLY,
                     this.curNumOfReads * OneReadSize, this.curNumOfReads == numOfReads ? lastReadSize : OneReadSize);
             this.curNumOfReads++;
-//        System.out.println("Log is loaded? "+this.mbb.isLoaded());
-//        System.out.println("MBB is direct? "+this.mbb.isDirect());
+
             this.mbb.load();
-//        System.out.println("Again, Log is loaded? "+this.mbb.isLoaded());
 
             this.mbb.position(0);
             while (this.mbb.hasRemaining()) {
@@ -312,7 +311,11 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
 
                 this.posInArr = 0;
                 //skip the header line
-                this.skipLine();
+                if (!readTheHeaderLine) {
+                    this.skipLine();
+                    readTheHeaderLine = true;
+                }
+
                 while (this.posInArr < this.BufSize) {
                     this.readLine();    //read one line
                     //handle all the violations found in the previous log entry!
