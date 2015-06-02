@@ -61,6 +61,10 @@ public class SignatureFormulaExtractor {
     }
 
     private static int[] GetArgsTypeFromStr(String eventArgs) {
+        if (eventArgs.matches("\\(\\s*\\)")) {
+            return new int[]{};
+        }
+
         String[] argsStrArr = eventArgs.substring(1, eventArgs.length() - 1).split(",");
         int[] argTypes = new int[argsStrArr.length];
 
@@ -82,7 +86,7 @@ public class SignatureFormulaExtractor {
                     break;
 
                 case "long":
-                    argTypes[i] = RegHelper.INT_TYPE;
+                    argTypes[i] = RegHelper.LONG_TYPE;
                     break;
 
                 case "Double":

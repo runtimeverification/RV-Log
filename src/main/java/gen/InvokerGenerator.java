@@ -211,6 +211,14 @@ public class InvokerGenerator {
                         eventMethodInvok.arg(parseIntMethInvok);
                         break;
 
+                    case RegHelper.LONG_TYPE:
+                        JClass longCls = CodeModel.directClass("Long");
+                        JInvocation parseLongMethInvok = longCls.staticInvoke("parseLong");
+                        parseLongMethInvok.arg(tupleData.component(index));
+
+                        eventMethodInvok.arg(parseLongMethInvok);
+                        break;
+
                     case RegHelper.FLOAT_TYPE:
                         JClass doubleCls = CodeModel.directClass("Double");
                         JInvocation parseDoubleMethInvok = doubleCls.staticInvoke("parseDouble");

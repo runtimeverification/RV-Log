@@ -353,13 +353,15 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
         EventName = this.getString();
         if (LogReader.isMonitoredEvent(EventName)) {
             String[] argsOfMeth = new String[this.eventArgsMap.get(EventName)];
-            for (int i = 0; i < argsOfMeth.length - 1; i++) {
-            //the last arg maybe at last index, which needs to be processed separately
-                String curArg = this.getString();
-                argsOfMeth[i] = curArg;
+            if (argsOfMeth.length > 0) {
+                for (int i = 0; i < argsOfMeth.length - 1; i++) {
+                    //the last arg maybe at last index, which needs to be processed separately
+                    String curArg = this.getString();
+                    argsOfMeth[i] = curArg;
+                }
+                argsOfMeth[argsOfMeth.length - 1] = this.getLastArg();
+                this.rmWhiteSpaceAndComma(false);
             }
-            argsOfMeth[argsOfMeth.length - 1] = this.getLastArg();
-            this.rmWhiteSpaceAndComma(false);
 
             LogReader.MonitorMethodsInvoker.invoke(EventName, argsOfMeth);
         } else {
@@ -439,9 +441,15 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
 
 }
 
+/**
+ * Created by xiaohe on 14-11-22.
+ * For all the reg ex, left should have optional spaces.
+ */
 class RegHelper {
     public static final int INT_TYPE = 0;
     public static final int FLOAT_TYPE = 1;
+    public static final int Bool_Type = 2;
+    public static final int LONG_TYPE = 3;
     public static final int STRING_TYPE = 4;
 
     // '_' | '[' | ']' | '/' | ':' | '-' | '.' | '!')* | '"'[^'"']*'"'
@@ -460,6 +468,27 @@ class RegHelper {
         this.eventTupleRegEx = this.init(tableCol);
     }
 
+    public static void main(String[] args) {
+
+        String str1 = "abc";
+        System.out.println("abc is str: " + str1.matches(StringRegEx));
+
+        String str12 = "0_[:.-!/abc";
+        System.out.println("str12 is str: " + str12.matches(StringRegEx));
+
+        String str2 = "\"ab0_:c\"";
+        System.out.println("str2 is str: " + str2.matches(StringRegEx));
+
+        String ts = "@123";
+        System.out.println("@123 is ts: " + ts.matches(TimeStamp));
+
+        String lineSeparator = System.getProperty("line.separator");
+        System.out.println("There are " + lineSeparator.length() + " chars in the line separator");
+        System.out.println("First char in line separator is `" + (int) lineSeparator.charAt(0) + "`");
+        System.out.println("Second line separator is `" + (int) lineSeparator.charAt(1) + "`");
+        System.out.println("The \\n 's ascii code is " + ((int) '\n'));
+        System.out.println("The \\r 's ascii code is " + ((int) '\r'));
+    }
 
     private HashMap<String, Pattern> init(HashMap<String, Integer[]> tableCol) {
         HashMap<String, Pattern> eventNameAndTupleRegexMap = new HashMap<>();
