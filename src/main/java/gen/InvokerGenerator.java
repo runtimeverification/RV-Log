@@ -107,23 +107,31 @@ public class InvokerGenerator {
         }
 
         Set<String> eventList = this.eventsInfo.getTableCol().keySet();
-        for (String eventName : eventList) {
-            String eventAction = this.eventsInfo.getEventAndActionsMap().get(eventName);
-            if (eventAction != null && !eventAction.replaceAll("\\W", "").equals("")) {
-                //if the event action is not empty, then add the event to the monitored list
+        if (allProperties.size() == 0) {
+            //if it is a raw spec, then monitor all the events
+            eventList.forEach(eventName -> {
                 JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
                 invocation.arg(eventName);
-            } else {
-                for (int i = 0; i < allProperties.size(); i++) {
-                    if (this.insideProp(allProperties.get(i), eventName)) {
-                        //if the event occurs inside some property, then it should be monitored
-                        JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
-                        invocation.arg(eventName);
-                        break;
+            });
+        } else {
+            for (String eventName : eventList) {
+                String eventAction = this.eventsInfo.getEventAndActionsMap().get(eventName);
+                if (eventAction != null && !eventAction.replaceAll("\\W", "").equals("")) {
+                    //if the event action is not empty, then add the event to the monitored list
+                    JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
+                    invocation.arg(eventName);
+                } else {
+                    for (int i = 0; i < allProperties.size(); i++) {
+                        if (this.insideProp(allProperties.get(i), eventName)) {
+                            //if the event occurs inside some property, then it should be monitored
+                            JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
+                            invocation.arg(eventName);
+                            break;
+                        }
                     }
                 }
-            }
 
+            }
         }
 
         initMonitorMethodBody._return(setOfEvents);
