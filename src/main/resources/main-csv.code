@@ -337,9 +337,7 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
 
         aFile.close();
 
-        System.out.println("There are " +
-                numOfLogEntries + " log entries in the log file!!!");
-
+//        System.out.println("There are " + numOfLogEntries + " log entries in the log file!!!");
     }
 
     /**
