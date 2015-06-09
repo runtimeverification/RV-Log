@@ -333,17 +333,14 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
             }
         }
 
-
         inChannel.close();
 
         aFile.close();
-
 
         System.out.println("There are " +
                 numOfLogEntries + " log entries in the log file!!!");
 
     }
-
 
     /**
      * We may decide whether to invoke an event method or not;
@@ -372,7 +369,6 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
             return;
         }
     }
-
 
     public void printEvent(Object[] data) throws IOException {
         StringBuilder sb = new StringBuilder();

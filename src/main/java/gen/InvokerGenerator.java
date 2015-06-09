@@ -20,6 +20,7 @@ import java.util.*;
 public class InvokerGenerator {
     private JCodeModel CodeModel;
     private String MonitorName;
+    private List<String> specNames = new ArrayList<>();;
     private List<String> ActualMonitorNames;
     private SignatureFormulaExtractor.EventsInfo eventsInfo;
     private String outputDir;
@@ -29,7 +30,6 @@ public class InvokerGenerator {
     }
 
     public void generateCustomizedInvoker(String monitorClassPath, SignatureFormulaExtractor.EventsInfo eventsInfo) {
-        List<String> specNames = new ArrayList<>();
         specNames.addAll(eventsInfo.getSpecPropsMap().keySet());
         HashMap<String, int[]> tableSchema = eventsInfo.getTableCol();
         this.eventsInfo = eventsInfo;
@@ -159,8 +159,19 @@ public class InvokerGenerator {
             }
 
             insertedPrintedMethods += "\t}";
-            entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}')) + insertedPrintedMethods;
+            entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
+                                + insertedPrintedMethods;
         }
+
+        StringBuilder sb = new StringBuilder();
+        this.specNames.forEach(specName -> {
+            String tr = specName + "RuntimeMonitor.timeReminder";
+            sb.append("if (!" + tr + ".hasAlreadyReported()) {\n");
+            sb.append( tr + ".report();\n}\n");
+        });
+
+        entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
+                              + sb.toString() + "\n}";
 
         definedClass.direct(entryPointCode);
 
