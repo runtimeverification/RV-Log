@@ -7,8 +7,8 @@ SpecFile=$2
 shift;
 shift;
 
-rv-log $SpecFile
-rv-monitor -t -d CustomizedLogReader/rvm/ --indexByVal $@ $SpecFile
+rv-log $SpecFile >/dev/null
+rv-monitor -t -d CustomizedLogReader/rvm/ --indexByVal $@ $SpecFile >/dev/null
 javac CustomizedLogReader/rvm/*.java
 cd CustomizedLogReader/
 java rvm.LogReader ../$TraceFile
