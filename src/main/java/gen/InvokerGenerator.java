@@ -164,12 +164,20 @@ public class InvokerGenerator {
                     + insertedPrintedMethods;
         }
 
-
         StringBuilder sb = new StringBuilder();
+        if (Main.TimeProp) {
+            this.specNames.forEach(specName -> {
+                String tr = specName + "RuntimeMonitor.timeReminder";
+                sb.append( tr + ".report();\n");
+            });
+        }
+
         sb.append("if (com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager != " +
                 "null \n&& ! com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager" +
                 ".hasAlreadyReported()) {\n");
-        sb.append("com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager.printStats();\n}\n");
+        sb.append("com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager" +
+                ".printStats();\n}\n");
+
 
         entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
                 + sb.toString() + "\n}";
