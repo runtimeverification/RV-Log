@@ -22,6 +22,7 @@ public class Main {
     private static String FORMAT = CSV;
     private static boolean strictParsing;
     private static String insertPoint4EventNameChecks = "        if (LogReader.isMonitoredEvent(EventName)) {";
+    public static boolean TimeProp = false;
 
     public static String getContentFromResource(String resourceName) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(resourceName)));
@@ -51,7 +52,10 @@ public class Main {
 
 
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-liveness"))
+            if ("-t".equals(args[i]))
+                TimeProp = true;
+
+            else if (args[i].equals("-liveness"))
                 IsMonitoringLivenessProperty = true;
 
             else if (args[i].equals("--format=monpoly"))

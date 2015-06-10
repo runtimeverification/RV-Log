@@ -1,0 +1,12 @@
+After running install.sh, a folder called RV-Log will be extracted from the archive.
+
+The run.sh is the script that runs the tool.
+
+The first two arguments of "run.sh" should trace file and specification file resp.
+
+The command line options include -events, -witness and -trace can be placed after
+the two required arguments, in any order. The effects of these options follow the requirements
+on the wiki.
+
+The monitor for monitoring the specification can be created by the run.sh script by simply removing
+the last two lines (The last two lines invoke the monitor to do the real monitoring). 

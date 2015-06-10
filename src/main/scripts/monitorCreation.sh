@@ -10,17 +10,13 @@ SRC_ROOT=`dirname "$SRC_ROOT"`
 RELEASE="$SRC_ROOT/rvmLib"
 export CLASSPATH="$RELEASE/rv-monitor.jar:$RELEASE/rv-monitor-rt.jar:$CLASSPATH"
 
-#The first argument is the path (relative to the location of this script) to the trace file.
-#The second argument is the relative path to the specification file. 
+#The first argument is the path to the specification file. 
 #The options -events, -witness and -trace can be given afterwards in any order.
 
-TraceFile=$1
-SpecFile=$2
-shift;
+SpecFile=$1
 shift;
 
 $SRC_ROOT/rv-log $SpecFile >/dev/null
-$SRC_ROOT/rv-monitor -d CustomizedLogReader/rvm/ --indexByVal $@ $SpecFile >/dev/null
-javac CustomizedLogReader/rvm/*.java 2>/dev/null
-cd CustomizedLogReader/
-java -d64 -Xms512m -Xmx4g rvm.LogReader ../$TraceFile
+$SRC_ROOT/rv-monitor -t -d CustomizedLogReader/rvm/ --indexByVal $@ $SpecFile >/dev/null
+javac CustomizedLogReader/rvm/*.java
+
