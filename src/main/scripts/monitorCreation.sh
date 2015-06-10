@@ -16,7 +16,13 @@ export CLASSPATH="$RELEASE/rv-monitor.jar:$RELEASE/rv-monitor-rt.jar:$CLASSPATH"
 SpecFile=$1
 shift;
 
-$SRC_ROOT/rv-log $SpecFile >/dev/null
-$SRC_ROOT/rv-monitor -t -d CustomizedLogReader/rvm/ --indexByVal $@ $SpecFile >/dev/null
+#The '-t' option is provided to both rv-log and rv-monitor for specification 'T3B2.rvm'
+TimeProp=""
+if [ $SpecFile == "T3B2.rvm" ]
+then TimeProp="-t"
+fi
+
+$SRC_ROOT/rv-log $TimeProp $SpecFile >/dev/null
+$SRC_ROOT/rv-monitor -t -d CustomizedLogReader/rvm/ --indexByVal $TimeProp $@ $SpecFile >/dev/null
 javac CustomizedLogReader/rvm/*.java
 

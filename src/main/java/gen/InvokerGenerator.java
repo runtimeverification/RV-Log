@@ -178,7 +178,7 @@ public class InvokerGenerator {
         sb.append("com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager" +
                 ".printStats();\n}\n");
 
-
+        sb.append("System.out.println(\"Property Satisfied\");\n");
         entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
                 + sb.toString() + "\n}";
 
