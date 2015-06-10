@@ -30,6 +30,7 @@
                 <include>INSTALL*</include>
                 <include>config/**</include>
                 <include>examples/**</include>
+		<include>rvmLib/**</include>
             </includes>
 
         </fileSet>

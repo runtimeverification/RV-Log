@@ -9,9 +9,11 @@ SRC_ROOT=`dirname "$SRC_ROOT"`
 
 MAINCLASS=com.runtimeverification.rvmonitor.java.rvj.Main
 
-RELEASE="$SRC_ROOT/lib"
+RELEASE="$SRC_ROOT/rvmLib"
 
 PLUGINS_CLASSPATH="$RELEASE/plugins/*"
 
-LOGICPLUGINPATH="$RELEASE/plugins/" java -cp "$RELEASE/*":$PLUGINS_CLASSPATH $MAINCLASS $@
+LOGICPLUGINPATH="$RELEASE/plugins/" 
+
+java -cp "$RELEASE/*":$PLUGINS_CLASSPATH $MAINCLASS $@
 
