@@ -182,7 +182,6 @@ public class InvokerGenerator {
         entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
                 + sb.toString() + "\n}";
 
-
         definedClass.direct(entryPointCode);
 
     }

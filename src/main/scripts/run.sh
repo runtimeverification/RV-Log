@@ -21,7 +21,7 @@ shift;
 
 #The '-t' option is provided to both rv-log and rv-monitor for specification 'T3B2.rvm'
 TimeProp=""
-if [ $SpecFile == "T3B2.rvm" ]
+if [[ $SpecFile == *"T3B2.rvm"* ]]
 then TimeProp="-t"
 fi
 
