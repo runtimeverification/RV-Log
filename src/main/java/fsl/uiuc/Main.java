@@ -35,9 +35,10 @@ public class Main {
     //by default, the events that are not in spec will be ignored safely.
     //however, in certain cases, it might be desirable to notice the occurrence of these events.
     //To make it work, user needs to define an event called "other" in the rvm spec.
-    private static boolean noticeOtherEvents = false;
+    public static boolean noticeOtherEvents = false;
 
     private static String skipEventCode = "this.skipLine();//skip the current event";
+
     /***************************************************************************************************************/
 
     public static String getContentFromResource(String resourceName) throws IOException {
@@ -105,12 +106,12 @@ public class Main {
         String imports = getContentFromResource("import.code");
         String mainBody;
         switch (FORMAT) {
-            case CSV :
+            case CSV:
                 mainBody = getContentFromResource("main-csv.code");
                 if (strictParsing) {
                     int insertPoint = mainBody.indexOf(insertPoint4EventNameChecks);
                     mainBody = mainBody.substring(0, insertPoint)
-                            + "\r\n" +  getContentFromResource("eventNameChecks.code") +
+                            + "\r\n" + getContentFromResource("eventNameChecks.code") +
                             mainBody.substring(insertPoint);
                 } else if (noticeOtherEvents) {
                     mainBody = mainBody.replace(skipEventCode, skipEventCode +
@@ -125,13 +126,13 @@ public class Main {
 
                 break;
 
-            case MONPOLY :
+            case MONPOLY:
                 mainBody = (IsMonitoringLivenessProperty) ? getContentFromResource
                         ("main-outputGenInRVM.code")
                         : getContentFromResource("main-monpoly.code");
                 break;
 
-            default :
+            default:
                 throw new IOException("Not support this format!");
         }
 

@@ -67,7 +67,9 @@ public class InvokerGenerator {
             SingleStreamCodeWriter sscw = new SingleStreamCodeWriter(System.out);
 
             buildInvocationMethod(definedClass, tableSchema);
-            buildInvokeOtherMethod(definedClass);
+
+            if (Main.noticeOtherEvents)
+                buildInvokeOtherMethod(definedClass);
 
             File outputDir = new File(this.outputDir);
             if (!outputDir.exists())
@@ -98,6 +100,7 @@ public class InvokerGenerator {
 
     /**
      * A special case is "__END" event, which will be only handled once at the end of the trace.
+     *
      * @param logReaderClass
      */
     private void initMonitoredEventsList(JDefinedClass logReaderClass) {
@@ -180,7 +183,7 @@ public class InvokerGenerator {
         if (Main.TimeProp) {
             this.specNames.forEach(specName -> {
                 String tr = specName + "RuntimeMonitor.timeReminder";
-                sb.append( tr + ".report();\n");
+                sb.append(tr + ".report();\n");
             });
         }
 

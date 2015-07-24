@@ -162,7 +162,7 @@ public class SignatureFormulaExtractor {
 
     public static void main(String[] args) throws IOException {
         Path logPath = Paths.get("A:\\Projects\\RV-Log\\target\\release\\RV-Log\\RV-Log" +
-                        "\\examples\\FSM\\HasNext\\HasNext.rvm");
+                "\\examples\\FSM\\HasNext\\HasNext.rvm");
         EventsInfo eventsInfo = SigExtractor.extractEventsInfoFromSigFile(logPath);
 
         printMethodSig(eventsInfo.getTableCol());
