@@ -363,7 +363,7 @@ class LogEntryExtractor_CSV implements LogReader.LogExtractor {
 
             LogReader.MonitorMethodsInvoker.invoke(EventName, argsOfMeth);
         } else {
-            this.skipLine();
+            this.skipLine();//skip the current event
             return;
         }
     }

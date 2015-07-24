@@ -31,6 +31,15 @@ public class Main {
     private static String newEventNameInitCode = "private String EventName = \"data\";";
     private static String eventNameUpdateCode = "EventName = this.getString();";
 
+    /***************************************************************************************************************/
+    //by default, the events that are not in spec will be ignored safely.
+    //however, in certain cases, it might be desirable to notice the occurrence of these events.
+    //To make it work, user needs to define an event called "other" in the rvm spec.
+    private static boolean noticeOtherEvents = false;
+
+    private static String skipEventCode = "this.skipLine();//skip the current event";
+    /***************************************************************************************************************/
+
     public static String getContentFromResource(String resourceName) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(resourceName)));
         String line = null;
@@ -71,9 +80,11 @@ public class Main {
             else if (args[i].equals("--strict"))
                 strictParsing = true;
 
-            else if (args[i].equals("--raw")) {
+            else if (args[i].equals("--raw"))
                 rawEvent = true;
-            }
+
+            else if (args[i].equals("--other"))
+                noticeOtherEvents = true;
 
             else
                 path2SigFile = Paths.get(args[i]);
@@ -101,12 +112,17 @@ public class Main {
                     mainBody = mainBody.substring(0, insertPoint)
                             + "\r\n" +  getContentFromResource("eventNameChecks.code") +
                             mainBody.substring(insertPoint);
+                } else if (noticeOtherEvents) {
+                    mainBody = mainBody.replace(skipEventCode, skipEventCode +
+                            "\nLogReader.MonitorMethodsInvoker.invokeOther();");
                 }
 
                 if (rawEvent) {
                     mainBody = mainBody.replace(eventNameInitCode, newEventNameInitCode);
                     mainBody = mainBody.replace(eventNameUpdateCode, "");
                 }
+
+
                 break;
 
             case MONPOLY :

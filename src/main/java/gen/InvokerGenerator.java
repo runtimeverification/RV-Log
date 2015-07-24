@@ -19,6 +19,7 @@ import java.util.*;
  */
 public class InvokerGenerator {
     private static final String END_EVENT = "__END";
+    private static final String OTHER_EVENT = "other";
 
     private JCodeModel CodeModel;
     private String MonitorName;
@@ -66,6 +67,8 @@ public class InvokerGenerator {
             SingleStreamCodeWriter sscw = new SingleStreamCodeWriter(System.out);
 
             buildInvocationMethod(definedClass, tableSchema);
+            buildInvokeOtherMethod(definedClass);
+
             File outputDir = new File(this.outputDir);
             if (!outputDir.exists())
                 outputDir.mkdirs();
@@ -116,7 +119,9 @@ public class InvokerGenerator {
 
         Set<String> eventList = this.eventsInfo.getTableCol().keySet();
 
-        eventList.stream().filter(str -> !str.equals(END_EVENT))
+        eventList.stream()
+                .filter(str -> !str.equals(END_EVENT))
+                .filter(str -> !str.equals(OTHER_EVENT))
                 .forEach(eventName -> {
                     JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
                     invocation.arg(eventName);
@@ -144,7 +149,7 @@ public class InvokerGenerator {
         JVar tmpTable = body.decl(tableSchemaType, "methodInfoTable", initTableExpr);
 
         for (String eventName : tableSchema.keySet()) {
-            if (eventName.equals(END_EVENT))
+            if (eventName.equals(END_EVENT) || eventName.equals(OTHER_EVENT))
                 continue;
 
             JExpression numOfArgsExpr = JExpr.lit(tableSchema.get(eventName).length);
@@ -199,6 +204,14 @@ public class InvokerGenerator {
         definedClass.direct(entryPointCode);
     }
 
+    private void buildInvokeOtherMethod(JDefinedClass definedClass) {
+        JMethod method = definedClass.method(JMod.PUBLIC | JMod.STATIC, Void.TYPE, "invokeOther");
+        JBlock body = method.body();
+        JClass monitorClass = CodeModel.ref(MonitorName);
+        JInvocation eventMethodInvok = monitorClass.staticInvoke(OTHER_EVENT + "Event");
+        body.add(eventMethodInvok);
+    }
+
     private void buildInvocationMethod(JDefinedClass definedClass, HashMap<String, int[]> tableSchema) {
         JMethod method = definedClass.method(JMod.PUBLIC | JMod.STATIC, Void.TYPE, "invoke");
         String eventNameStr = "eventName";
@@ -214,7 +227,7 @@ public class InvokerGenerator {
         JClass monitorClass = CodeModel.ref(MonitorName);
 
         for (String eventName : tableSchema.keySet()) {
-            if (eventName.equals(END_EVENT))
+            if (eventName.equals(END_EVENT) || eventName.equals(OTHER_EVENT))
                 continue;
 
             JCase jCase = jSwitch._case(JExpr.lit(eventName));
