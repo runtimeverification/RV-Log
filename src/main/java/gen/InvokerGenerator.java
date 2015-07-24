@@ -18,6 +18,8 @@ import java.util.*;
  * Created by xiaohe on 2/2/15.
  */
 public class InvokerGenerator {
+    private static final String END_EVENT = "__END";
+
     private JCodeModel CodeModel;
     private String MonitorName;
     private List<String> specNames = new ArrayList<>();
@@ -90,6 +92,11 @@ public class InvokerGenerator {
         isMonitoredEventMethod.body()._return(invok);
     }
 
+
+    /**
+     * A special case is "__END" event, which will be only handled once at the end of the trace.
+     * @param logReaderClass
+     */
     private void initMonitoredEventsList(JDefinedClass logReaderClass) {
         String methodName = "initMonitoredEventsSet";
         int accessModifier = JMod.PRIVATE | JMod.STATIC;
@@ -109,16 +116,13 @@ public class InvokerGenerator {
 
         Set<String> eventList = this.eventsInfo.getTableCol().keySet();
 
-        eventList.forEach(eventName -> {
-            JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
-            invocation.arg(eventName);
-        });
+        eventList.stream().filter(str -> !str.equals(END_EVENT))
+                .forEach(eventName -> {
+                    JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
+                    invocation.arg(eventName);
+                });
 
         initMonitorMethodBody._return(setOfEvents);
-    }
-
-    private boolean insideProp(Property p, String eventName) {
-        return p.getSyntax().contains(eventName);
     }
 
     private void initFields(JDefinedClass logReaderClass) {
@@ -140,6 +144,9 @@ public class InvokerGenerator {
         JVar tmpTable = body.decl(tableSchemaType, "methodInfoTable", initTableExpr);
 
         for (String eventName : tableSchema.keySet()) {
+            if (eventName.equals(END_EVENT))
+                continue;
+
             JExpression numOfArgsExpr = JExpr.lit(tableSchema.get(eventName).length);
 
             JInvocation putMethodInvok = body.invoke(tmpTable, "put");
@@ -182,8 +189,14 @@ public class InvokerGenerator {
         entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
                 + sb.toString() + "\n}";
 
-        definedClass.direct(entryPointCode);
 
+        JMethod endMethod = definedClass.method(JMod.PRIVATE | JMod.STATIC, Void.TYPE, "endEvent");
+        JBlock endMethodBody = endMethod.body();
+        JClass monitorClass = CodeModel.ref(MonitorName);
+        JInvocation invok = monitorClass.staticInvoke("actionsAtTheEnd");
+        endMethodBody.add(invok);
+
+        definedClass.direct(entryPointCode);
     }
 
     private void buildInvocationMethod(JDefinedClass definedClass, HashMap<String, int[]> tableSchema) {
@@ -201,6 +214,9 @@ public class InvokerGenerator {
         JClass monitorClass = CodeModel.ref(MonitorName);
 
         for (String eventName : tableSchema.keySet()) {
+            if (eventName.equals(END_EVENT))
+                continue;
+
             JCase jCase = jSwitch._case(JExpr.lit(eventName));
             JInvocation eventMethodInvok = monitorClass.staticInvoke(eventName + "Event");
             jCase.body().add(eventMethodInvok);

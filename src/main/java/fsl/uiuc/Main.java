@@ -24,6 +24,13 @@ public class Main {
     private static String insertPoint4EventNameChecks = "        if (LogReader.isMonitoredEvent(EventName)) {";
     public static boolean TimeProp = false;
 
+    //if the 'rawEvent' option is on, then the event names will not be read from the log file;
+    //instead, the default event name 'data' will be used throughout the log file.
+    private static boolean rawEvent = false;
+    private static String eventNameInitCode = "private String EventName;";
+    private static String newEventNameInitCode = "private String EventName = \"data\";";
+    private static String eventNameUpdateCode = "EventName = this.getString();";
+
     public static String getContentFromResource(String resourceName) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(resourceName)));
         String line = null;
@@ -63,6 +70,11 @@ public class Main {
 
             else if (args[i].equals("--strict"))
                 strictParsing = true;
+
+            else if (args[i].equals("--raw")) {
+                rawEvent = true;
+            }
+
             else
                 path2SigFile = Paths.get(args[i]);
         }
@@ -83,15 +95,17 @@ public class Main {
         String mainBody;
         switch (FORMAT) {
             case CSV :
-                if (IsMonitoringLivenessProperty)
-                    throw new IOException("Does not support liveness property in CSV format");
-
                 mainBody = getContentFromResource("main-csv.code");
                 if (strictParsing) {
                     int insertPoint = mainBody.indexOf(insertPoint4EventNameChecks);
                     mainBody = mainBody.substring(0, insertPoint)
                             + "\r\n" +  getContentFromResource("eventNameChecks.code") +
                             mainBody.substring(insertPoint);
+                }
+
+                if (rawEvent) {
+                    mainBody = mainBody.replace(eventNameInitCode, newEventNameInitCode);
+                    mainBody = mainBody.replace(eventNameUpdateCode, "");
                 }
                 break;
 

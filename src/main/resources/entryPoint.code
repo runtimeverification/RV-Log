@@ -10,4 +10,5 @@
         //LogExtractor lee = new LogEntryExtractor(methodInfo, path2Log, 6);
         LogExtractor lee = new LogEntryExtractor_CSV(methodInfo, path2Log, 6);
         lee.startReadingEventsByteByByte();
+	endEvent();
     }
