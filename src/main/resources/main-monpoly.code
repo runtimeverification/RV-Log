@@ -583,8 +583,8 @@ class LogEntryExtractor implements LogReader.LogExtractor {
     private void readEvent() throws IOException {
         String[] argsOfMeth = new String[eventArgsMap.get(EventName)];
 
-            if (argsOfMeth.length > 0) {
-                for (int i = 0; i < argsOfMeth.length - 1; i++) {
+            if (argsOfMeth.length > 1) {
+                for (int i = 0; i < argsOfMeth.length - 2; i++) {
                         this.paramStartIndex = this.posInArr;
                     //the last arg maybe at last index, which needs to be processed separately
                     String curArg = this.getStringFromBuf(comma);
@@ -594,8 +594,10 @@ class LogEntryExtractor implements LogReader.LogExtractor {
                 }
 
                 this.paramStartIndex = this.posInArr;
-                argsOfMeth[argsOfMeth.length - 1] = this.getStringFromBuf(rpa);
+                argsOfMeth[argsOfMeth.length - 2] = this.getStringFromBuf(rpa);
                 this.rmWhiteSpaceAndComma(false);
+
+                argsOfMeth[argsOfMeth.length - 1] = TimeStamp + "";
             }
 
         LogReader.MonitorMethodsInvoker.invoke(EventName, argsOfMeth);
