@@ -166,17 +166,9 @@ public class InvokerGenerator {
 
     private void initLogReaderClass(JDefinedClass definedClass) throws IOException {
         String entryPointCode = Main.getContentFromResource("entryPoint.code");
-        if (Main.IsMonitoringLivenessProperty) {
-            String insertedPrintedMethods = "";
-            String tab = "\t\t";
-            for (int i = 0; i < this.ActualMonitorNames.size(); i++) {
-                insertedPrintedMethods += i == 0 ? '\t' : tab;
-                insertedPrintedMethods += this.ActualMonitorNames.get(i) + ".printAllViolations();\n";
-            }
 
-            insertedPrintedMethods += "\t}";
-            entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
-                    + insertedPrintedMethods;
+        if (Main.isMonpolyLog()) {
+            entryPointCode.replaceAll("LogEntryExtractor_CSV", "LogEntryExtractor");
         }
 
         StringBuilder sb = new StringBuilder();

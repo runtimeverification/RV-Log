@@ -7,7 +7,6 @@
                 "The only argument needed is the log file (with .log suffix).";
 
         Path path2Log = path2Log = Paths.get(args[0]);
-        //LogExtractor lee = new LogEntryExtractor(methodInfo, path2Log, 6);
         LogExtractor lee = new LogEntryExtractor_CSV(methodInfo, path2Log, 6);
         lee.startReadingEventsByteByByte();
 	endEvent();

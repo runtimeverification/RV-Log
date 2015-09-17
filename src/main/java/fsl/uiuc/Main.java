@@ -15,7 +15,6 @@ public class Main {
     public static final String CSV = "CSV";
     public static final String MONPOLY = "MON";
 
-    public static boolean IsMonitoringLivenessProperty;
     public static Path genLogReaderPath;
     private static ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static String OutPutFilePath = "./CustomizedLogReader/rvm/LogReader.java";
@@ -72,9 +71,6 @@ public class Main {
             if ("-t".equals(args[i]))
                 TimeProp = true;
 
-            else if (args[i].equals("-liveness"))
-                IsMonitoringLivenessProperty = true;
-
             else if (args[i].equals("--format=monpoly"))
                 FORMAT = MONPOLY;
 
@@ -127,9 +123,7 @@ public class Main {
                 break;
 
             case MONPOLY:
-                mainBody = (IsMonitoringLivenessProperty) ? getContentFromResource
-                        ("main-outputGenInRVM.code")
-                        : getContentFromResource("main-monpoly.code");
+                mainBody = getContentFromResource("main-monpoly.code");
                 break;
 
             default:
@@ -166,5 +160,9 @@ public class Main {
             System.exit(1);
         }
         return path;
+    }
+
+    public static boolean isMonpolyLog() {
+        return FORMAT.equals(MONPOLY);
     }
 }
