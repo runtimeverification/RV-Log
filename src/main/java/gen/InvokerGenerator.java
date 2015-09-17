@@ -168,7 +168,8 @@ public class InvokerGenerator {
         String entryPointCode = Main.getContentFromResource("entryPoint.code");
 
         if (Main.isMonpolyLog()) {
-            entryPointCode.replaceAll("LogEntryExtractor_CSV", "LogEntryExtractor");
+            entryPointCode = entryPointCode.replaceAll("LogEntryExtractor_CSV",
+                    "LogEntryExtractor");
         }
 
         StringBuilder sb = new StringBuilder();
