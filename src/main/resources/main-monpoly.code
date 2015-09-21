@@ -221,30 +221,6 @@ class LogEntryExtractor implements LogReader.LogExtractor {
         }
     }
 
-    private void rmWhiteSpaceAndComma(boolean mustSucceed) throws IOException {
-        out:
-        while (true) {
-            while (this.posInArr < this.BufSize) {
-                byte b = byteArr[this.posInArr++];
-                if (!isWhiteSpace(b) && b != comma) {
-                    this.posInArr--;
-                    break out;
-                }
-            }
-
-            if (mustSucceed)
-                this.refill("Unexpected end of file while removing the white spaces");
-            else {
-                try {
-                    this.refill("");
-                } catch (Exception e) {
-
-                }
-            }
-        }
-    }
-
-
 
     private void skipComment() throws IOException {
         while (true) {
@@ -595,7 +571,6 @@ class LogEntryExtractor implements LogReader.LogExtractor {
 
                 this.paramStartIndex = this.posInArr;
                 argsOfMeth[argsOfMeth.length - 2] = this.getStringFromBuf(rpa);
-                this.rmWhiteSpaceAndComma(false);
 
                 argsOfMeth[argsOfMeth.length - 1] = TimeStamp + "";
             }
