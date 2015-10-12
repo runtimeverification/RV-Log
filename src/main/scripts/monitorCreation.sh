@@ -23,6 +23,6 @@ then TimeProp="-t"
 fi
 
 $SRC_ROOT/rv-log $TimeProp $SpecFile >/dev/null
-$SRC_ROOT/rv-monitor -t -d CustomizedLogReader/rvm/ --indexByVal $TimeProp $@ $SpecFile >/dev/null
+rv-monitor -t -d CustomizedLogReader/rvm/ --indexByVal $TimeProp $@ $SpecFile >/dev/null
 javac CustomizedLogReader/rvm/*.java
 
