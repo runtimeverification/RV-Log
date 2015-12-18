@@ -1,60 +1,37 @@
-<assembly>
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
     <id>RV-Log</id>
 
     <!-- Adds the dependencies of our application to the lib directory -->
-    <dependencySets>
-        <dependencySet>
-            <!--
-                Project artifact is not copied under library directory since
-                it is added to the root directory of the zip package.
-            -->
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>lib</outputDirectory>
-            <unpack>false</unpack>
-        </dependencySet>
-    </dependencySets>
+	<includeBaseDirectory>true</includeBaseDirectory>
+		<dependencySets>
+			<dependencySet>
+				<outputDirectory>lib</outputDirectory>
+			</dependencySet>
+		</dependencySets>
 
-    <fileSets>
+	<fileSets>
         <fileSet>
             <directory>.</directory>
             <outputDirectory>/</outputDirectory>
-
-            <excludes>
-                <exclude>%regex[.*\.bak]</exclude>
-                <exclude>%regex[.*~]</exclude>
-            </excludes>
-
             <includes>
                 <include>LICENSE*</include>
                 <include>README*</include>
                 <include>INSTALL*</include>
-                <include>config/**</include>
                 <include>examples/**</include>
-                <include>rvmLib/**</include>
+                <include>config/**</include>
             </includes>
-
+			<excludes>
+                <exclude>%regex[.*\.bak]</exclude>
+                <exclude>%regex[.*~]</exclude>
+            </excludes>
         </fileSet>
-
-
-        <!--
-            Adds startup scripts to the root directory of zip package. The startup
-            scripts are copied from the src/main/scripts directory.
-        -->
         <fileSet>
-            <directory>${project.build.scriptSourceDirectory}</directory>
-            <outputDirectory></outputDirectory>
+            <directory>src/main/scripts/</directory>
+            <outputDirectory>/</outputDirectory>
             <includes>
-            </includes>
-        </fileSet>
-        <!--
-            Adds the jar file of our example application to the root directory
-            of the created zip package.
-        -->
-        <fileSet>
-            <directory>${project.build.directory}</directory>
-            <outputDirectory>lib</outputDirectory>
-            <includes>
-                <include>*.jar</include>
+                <include>bin/</include>
             </includes>
         </fileSet>
     </fileSets>
