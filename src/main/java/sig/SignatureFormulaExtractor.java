@@ -1,11 +1,11 @@
 package sig;
 
-import com.runtimeverification.rvmonitor.core.ast.Event;
-import com.runtimeverification.rvmonitor.core.ast.MonitorFile;
-import com.runtimeverification.rvmonitor.core.ast.Property;
-import com.runtimeverification.rvmonitor.core.ast.Specification;
-import com.runtimeverification.rvmonitor.core.parser.RVParser;
-import com.runtimeverification.rvmonitor.java.rvj.JavaParserAdapter;
+import javamop.parser.JavaParserAdapter;
+import javamop.parser.main_parser.RVParser;
+import javamop.parser.rvm.core.ast.Event;
+import javamop.parser.rvm.core.ast.MonitorFile;
+import javamop.parser.rvm.core.ast.Property;
+import javamop.parser.rvm.core.ast.Specification;
 import reg.RegHelper;
 
 import java.io.IOException;
@@ -190,7 +190,7 @@ public class SignatureFormulaExtractor {
         fileContent = fileContent.replaceAll("//.*[\n\r]", "");  //remove all comments
         List<String> listOfRawMonitoringCode = JavaParserAdapter.getRawMonitoringCode(fileContent);
         //remove the raw monitoring code from the rvm spec so that it can be handled by rv-parser
-        fileContent = fileContent.replaceAll("raw\\s*:", "");
+        fileContent = fileContent.replaceAll("(?<=\\})\\s*raw\\s*:", "");
         for (int i = 0; i < listOfRawMonitoringCode.size(); i++) {
             String rawCode = listOfRawMonitoringCode.get(i);
             fileContent = fileContent.replace(rawCode, "");

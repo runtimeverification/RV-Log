@@ -1,6 +1,6 @@
 package gen;
 
-import com.runtimeverification.rvmonitor.core.ast.Property;
+import javamop.parser.rvm.core.ast.Property;
 import com.sun.codemodel.*;
 import com.sun.codemodel.writer.SingleStreamCodeWriter;
 import fsl.uiuc.Main;
