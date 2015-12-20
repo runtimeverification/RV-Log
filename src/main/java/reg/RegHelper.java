@@ -11,6 +11,7 @@ public class RegHelper {
     public static final int INT_TYPE = 0;
     public static final int FLOAT_TYPE = 1;
     public static final int Bool_Type = 2;
+    public static final int LONG_TYPE = 3;
     public static final int STRING_TYPE = 4;
 
     // '_' | '[' | ']' | '/' | ':' | '-' | '.' | '!')* | '"'[^'"']*'"'

@@ -1,11 +1,11 @@
 package sig;
 
-import com.runtimeverification.rvmonitor.core.ast.Event;
-import com.runtimeverification.rvmonitor.core.ast.MonitorFile;
-import com.runtimeverification.rvmonitor.core.ast.Property;
-import com.runtimeverification.rvmonitor.core.ast.Specification;
-import com.runtimeverification.rvmonitor.core.parser.RVParser;
-import com.runtimeverification.rvmonitor.java.rvj.JavaParserAdapter;
+import javamop.parser.JavaParserAdapter;
+import javamop.parser.main_parser.RVParser;
+import javamop.parser.rvm.core.ast.Event;
+import javamop.parser.rvm.core.ast.MonitorFile;
+import javamop.parser.rvm.core.ast.Property;
+import javamop.parser.rvm.core.ast.Specification;
 import reg.RegHelper;
 
 import java.io.IOException;
@@ -61,6 +61,10 @@ public class SignatureFormulaExtractor {
     }
 
     private static int[] GetArgsTypeFromStr(String eventArgs) {
+        if (eventArgs.matches("\\(\\s*\\)")) {
+            return new int[]{};
+        }
+
         String[] argsStrArr = eventArgs.substring(1, eventArgs.length() - 1).split(",");
         int[] argTypes = new int[argsStrArr.length];
 
@@ -79,6 +83,10 @@ public class SignatureFormulaExtractor {
 
                 case "int":
                     argTypes[i] = RegHelper.INT_TYPE;
+                    break;
+
+                case "long":
+                    argTypes[i] = RegHelper.LONG_TYPE;
                     break;
 
                 case "Double":
@@ -154,7 +162,7 @@ public class SignatureFormulaExtractor {
 
     public static void main(String[] args) throws IOException {
         Path logPath = Paths.get("A:\\Projects\\RV-Log\\target\\release\\RV-Log\\RV-Log" +
-                        "\\examples\\FSM\\HasNext\\HasNext.rvm");
+                "\\examples\\FSM\\HasNext\\HasNext.rvm");
         EventsInfo eventsInfo = SigExtractor.extractEventsInfoFromSigFile(logPath);
 
         printMethodSig(eventsInfo.getTableCol());
@@ -182,7 +190,7 @@ public class SignatureFormulaExtractor {
         fileContent = fileContent.replaceAll("//.*[\n\r]", "");  //remove all comments
         List<String> listOfRawMonitoringCode = JavaParserAdapter.getRawMonitoringCode(fileContent);
         //remove the raw monitoring code from the rvm spec so that it can be handled by rv-parser
-        fileContent = fileContent.replaceAll("raw\\s*:", "");
+        fileContent = fileContent.replaceAll("(?<=\\})\\s*raw\\s*:", "");
         for (int i = 0; i < listOfRawMonitoringCode.size(); i++) {
             String rawCode = listOfRawMonitoringCode.get(i);
             fileContent = fileContent.replace(rawCode, "");

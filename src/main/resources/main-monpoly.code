@@ -43,10 +43,7 @@ class LogEntryExtractor implements LogReader.LogExtractor {
 
     private long numOfLogEntries = 0;
 
-    /**
-     * Given a table name, return the list of types that represent the types for each column (table schema).
-     */
-    private HashMap<String, int[]> TableCol;
+    private HashMap<String, Integer> eventArgsMap;
     private String logFilePath;
     //    indirect optimal 8kb
 //    private static final int DirectBufSizeOptimal4MyHP = 64 * 1024;
@@ -60,11 +57,7 @@ class LogEntryExtractor implements LogReader.LogExtractor {
     //if the ending index is less than the starting one, then the starting index comes from the old byte array
 
     private int EventNameStartIndex;
-
     private int paramStartIndex;
-
-    private int[] typesInTuple;
-    private boolean isAMonitoredEvent;
 
     private long numOfReads;
     private long lastReadSize;
@@ -77,14 +70,14 @@ class LogEntryExtractor implements LogReader.LogExtractor {
     /**
      * Create an obj for log entry extractor.
      *
-     * @param tableCol
+     * @param eventArgsMap
      * @param logFile
      * @param powOf2TimesKB Multiple of 1024.
      * @throws IOException
      */
-    public LogEntryExtractor(HashMap<String, int[]> tableCol, Path logFile, int powOf2TimesKB)
+    public LogEntryExtractor(HashMap<String, Integer> eventArgsMap, Path logFile, int powOf2TimesKB)
             throws IOException {
-        this.TableCol = tableCol;
+        this.eventArgsMap = eventArgsMap;
         this.logFilePath = logFile.toString();
         this.BufSize = (int) (Math.pow(2, powOf2TimesKB)) * 1024;
         this.byteArr = new byte[this.BufSize];
@@ -92,8 +85,8 @@ class LogEntryExtractor implements LogReader.LogExtractor {
     }
 
 
-    public LogEntryExtractor(HashMap<String, int[]> tableCol, Path logFile) throws IOException {
-        this(tableCol, logFile, 5);
+    public LogEntryExtractor(HashMap<String, Integer> eventArgsMap, Path logFile) throws IOException {
+        this(eventArgsMap, logFile, 5);
     }
 
     private boolean isWhiteSpace(byte b) {
@@ -227,6 +220,7 @@ class LogEntryExtractor implements LogReader.LogExtractor {
             this.refill("Unexpected end of file while removing the white spaces");
         }
     }
+
 
     private void skipComment() throws IOException {
         while (true) {
@@ -458,7 +452,6 @@ class LogEntryExtractor implements LogReader.LogExtractor {
         this.inChannel = aFile.getChannel();
         long fileSize = inChannel.size();
 
-//        System.out.println("There are totally "+this.fileSize+" bytes in the file");
         this.numOfReads = fileSize / OneReadSize;
         this.lastReadSize = fileSize % OneReadSize;
 
@@ -466,10 +459,8 @@ class LogEntryExtractor implements LogReader.LogExtractor {
             this.mbb = inChannel.map(FileChannel.MapMode.READ_ONLY,
                     this.curNumOfReads * OneReadSize, this.curNumOfReads == numOfReads ? lastReadSize : OneReadSize);
             this.curNumOfReads++;
-//        System.out.println("Log is loaded? "+this.mbb.isLoaded());
-//        System.out.println("MBB is direct? "+this.mbb.isDirect());
+
             this.mbb.load();
-//        System.out.println("Again, Log is loaded? "+this.mbb.isLoaded());
 
             this.mbb.position(0);
             while (this.mbb.hasRemaining()) {
@@ -500,14 +491,10 @@ class LogEntryExtractor implements LogReader.LogExtractor {
                         }
                         this.prevToken = EventArgs_TOKEN;
 
-
-                        if (this.isAMonitoredEvent) {//do the most rigorous type checking to the event args
                             this.rmWhiteSpace();
 
                             this.readEvent();
-                        } else {//event is not monitored, just ensure no syntax error
-                            this.looseCheckingEventArgs();
-                        }
+
                     } else if (isStringChar(b) || b == doubleQuote) { //read an event
                         if (this.prevToken == NULL_TOKEN) {
                             throw new IOException("Event name should follow a time stamp or event args or event name");
@@ -523,19 +510,6 @@ class LogEntryExtractor implements LogReader.LogExtractor {
                             this.EventNameStartIndex = this.posInArr - 1;
                             this.EventName = this.getEventName();
 
-                        }
-
-                        this.typesInTuple = TableCol.get(EventName);
-                        if (this.typesInTuple == null) {
-                            throw new IOException("Unknown event " + EventName);
-                        }
-
-                        if (LogReader.isMonitoredEvent(EventName)) {
-                            this.isAMonitoredEvent = true;
-//                        the boolean list contains info about how to skip certain fields when output the violations
-//                            this.unPrintedFields = EventSigExtractor.skippedFieldsMap.get(EventName);
-                        } else {
-                            this.isAMonitoredEvent = false;
                         }
 
                     } else if (b == at) {
@@ -583,49 +557,25 @@ class LogEntryExtractor implements LogReader.LogExtractor {
      * @throws IOException
      */
     private void readEvent() throws IOException {
-        Object[] tupleData = new Object[typesInTuple.length];
-        int i = 0;
-        for (; i < typesInTuple.length - 1; i++) {
-            this.paramStartIndex = this.posInArr;
+        String[] argsOfMeth = new String[eventArgsMap.get(EventName)];
 
-            switch (typesInTuple[i]) {
-                case RegHelper.INT_TYPE:
-                    tupleData[i] = this.getIntFromBuf(comma);
-                    break;
+            if (argsOfMeth.length > 1) {
+                for (int i = 0; i < argsOfMeth.length - 2; i++) {
+                        this.paramStartIndex = this.posInArr;
+                    //the last arg maybe at last index, which needs to be processed separately
+                    String curArg = this.getStringFromBuf(comma);
+                    argsOfMeth[i] = curArg;
 
-                case RegHelper.FLOAT_TYPE:
-                    tupleData[i] = this.getFloatingNumFromBuf(comma);
-                    break;
+                    this.rmWhiteSpace();
+                }
 
-                case RegHelper.STRING_TYPE:
-                    tupleData[i] = this.getStringFromBuf(comma);
-                    break;
+                this.paramStartIndex = this.posInArr;
+                argsOfMeth[argsOfMeth.length - 2] = this.getStringFromBuf(rpa);
+
+                argsOfMeth[argsOfMeth.length - 1] = TimeStamp + "";
             }
-            this.rmWhiteSpace();
-        }
 
-        if (typesInTuple.length > 0) {
-            //the last field should be followed by a right parenthesis
-//            this.curParamIndex = typesInTuple.length - 1;
-            this.paramStartIndex = this.posInArr;
-
-            switch (typesInTuple[i]) {
-                case RegHelper.INT_TYPE:
-                    tupleData[i] = this.getIntFromBuf(rpa);
-                    break;
-
-                case RegHelper.FLOAT_TYPE:
-                    tupleData[i] = this.getFloatingNumFromBuf(rpa);
-                    break;
-
-                case RegHelper.STRING_TYPE:
-                    tupleData[i] = this.getStringFromBuf(rpa);
-                    break;
-            }
-        }
-
-
-        LogReader.MonitorMethodsInvoker.invoke(EventName, tupleData);
+        LogReader.MonitorMethodsInvoker.invoke(EventName, argsOfMeth);
 
     }
 

@@ -15,13 +15,30 @@ public class Main {
     public static final String CSV = "CSV";
     public static final String MONPOLY = "MON";
 
-    public static boolean IsMonitoringLivenessProperty;
     public static Path genLogReaderPath;
     private static ClassLoader classLoader = ClassLoader.getSystemClassLoader();
     private static String OutPutFilePath = "./CustomizedLogReader/rvm/LogReader.java";
     private static String FORMAT = CSV;
     private static boolean strictParsing;
     private static String insertPoint4EventNameChecks = "        if (LogReader.isMonitoredEvent(EventName)) {";
+    public static boolean TimeProp = false;
+
+    //if the 'rawEvent' option is on, then the event names will not be read from the log file;
+    //instead, the default event name 'data' will be used throughout the log file.
+    private static boolean rawEvent = false;
+    private static String eventNameInitCode = "private String EventName;";
+    private static String newEventNameInitCode = "private String EventName = \"data\";";
+    private static String eventNameUpdateCode = "EventName = this.getString();";
+
+    /***************************************************************************************************************/
+    //by default, the events that are not in spec will be ignored safely.
+    //however, in certain cases, it might be desirable to notice the occurrence of these events.
+    //To make it work, user needs to define an event called "other" in the rvm spec.
+    public static boolean noticeOtherEvents = false;
+
+    private static String skipEventCode = "this.skipLine();//skip the current event";
+
+    /***************************************************************************************************************/
 
     public static String getContentFromResource(String resourceName) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(classLoader.getResourceAsStream(resourceName)));
@@ -49,19 +66,26 @@ public class Main {
 
         genLogReaderPath = initOutputFile();
 
-
         for (int i = 0; i < args.length; i++) {
-            if (args[i].equals("-liveness"))
-                IsMonitoringLivenessProperty = true;
+            if ("-t".equals(args[i]))
+                TimeProp = true;
 
             else if (args[i].equals("--format=monpoly"))
                 FORMAT = MONPOLY;
 
             else if (args[i].equals("--strict"))
                 strictParsing = true;
+
+            else if (args[i].equals("--raw"))
+                rawEvent = true;
+
+            else if (args[i].equals("--other"))
+                noticeOtherEvents = true;
+
             else
                 path2SigFile = Paths.get(args[i]);
         }
+
         if (path2SigFile == null)
             throw new IOException("Please provide one .rvm specification file.");
 
@@ -78,26 +102,31 @@ public class Main {
         String imports = getContentFromResource("import.code");
         String mainBody;
         switch (FORMAT) {
-            case CSV :
-                if (IsMonitoringLivenessProperty)
-                    throw new IOException("Does not support liveness property in CSV format");
-
+            case CSV:
                 mainBody = getContentFromResource("main-csv.code");
                 if (strictParsing) {
                     int insertPoint = mainBody.indexOf(insertPoint4EventNameChecks);
                     mainBody = mainBody.substring(0, insertPoint)
-                            + "\r\n" +  getContentFromResource("eventNameChecks.code") +
+                            + "\r\n" + getContentFromResource("eventNameChecks.code") +
                             mainBody.substring(insertPoint);
+                } else if (noticeOtherEvents) {
+                    mainBody = mainBody.replace(skipEventCode, skipEventCode +
+                            "\nLogReader.MonitorMethodsInvoker.invokeOther();");
                 }
+
+                if (rawEvent) {
+                    mainBody = mainBody.replace(eventNameInitCode, newEventNameInitCode);
+                    mainBody = mainBody.replace(eventNameUpdateCode, "");
+                }
+
+
                 break;
 
-            case MONPOLY :
-                mainBody = (IsMonitoringLivenessProperty) ? getContentFromResource
-                        ("main-outputGenInRVM.code")
-                        : getContentFromResource("main-monpoly.code");
+            case MONPOLY:
+                mainBody = getContentFromResource("main-monpoly.code");
                 break;
 
-            default :
+            default:
                 throw new IOException("Not support this format!");
         }
 
@@ -131,5 +160,9 @@ public class Main {
             System.exit(1);
         }
         return path;
+    }
+
+    public static boolean isMonpolyLog() {
+        return FORMAT.equals(MONPOLY);
     }
 }

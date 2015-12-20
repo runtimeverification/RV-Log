@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -10,28 +9,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.5</version>
-                <configuration>
-                    <!-- Configures the created archive -->
-                    <archive>
-                        <!-- Configures the content of the created manifest -->
-                        <manifest>
-                            <!-- Adds the classpath to the created manifest -->
-                            <addClasspath>true</addClasspath>
-                            <!--
-                                Specifies that all dependencies of our application are found
-                                from the lib directory.
-                            -->
-                            <classpathPrefix>lib/</classpathPrefix>
-                            <!-- Configures the main class of the application -->
-                            <mainClass>fsl.uiuc.Main</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -65,8 +42,6 @@
                         </configuration>
                     </execution>
                 </executions>
-
-
                 <configuration>
                     <!-- Configures the used assembly descriptor -->
                     <descriptors>
@@ -74,8 +49,10 @@
                     </descriptors>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
+
 
     <repositories>
         <repository>
@@ -112,8 +89,8 @@
 
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>com.springsource.org.apache.commons.compress</artifactId>
-            <version>1.1.0</version>
+            <artifactId>commons-compress</artifactId>
+            <version>1.9</version>
         </dependency>
 
         <dependency>
@@ -127,11 +104,16 @@
             <artifactId>codemodel</artifactId>
             <version>2.2.11</version>
         </dependency>
+
         <dependency>
-            <groupId>com.runtimeverification.rvmonitor</groupId>
-            <artifactId>rv-monitor</artifactId>
-            <version>1.4-SNAPSHOT</version>
+            <groupId>rvm-parser</groupId>
+            <artifactId>javamop.parser</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/javamop-4.0-SNAPSHOT.jar</systemPath>
         </dependency>
     </dependencies>
 
+
 </project>
+

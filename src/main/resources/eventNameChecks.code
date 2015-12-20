@@ -1,4 +1,4 @@
-        //finally we can have two version of the log reader.
+        //finally we can have two versions of the log reader.
         //if the strict option is on, then use this version, otherwise, there will be
         //no such check like the one at below...
        if (!this.eventArgsMap.keySet().contains(EventName)) {

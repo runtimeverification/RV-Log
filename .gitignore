@@ -3,7 +3,6 @@ out/*
 *~
 *.class
 *Log.txt
-*.jar
 *.iml
 production/*
 test-out/*

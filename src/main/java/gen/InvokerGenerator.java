@@ -1,6 +1,6 @@
 package gen;
 
-import com.runtimeverification.rvmonitor.core.ast.Property;
+import javamop.parser.rvm.core.ast.Property;
 import com.sun.codemodel.*;
 import com.sun.codemodel.writer.SingleStreamCodeWriter;
 import fsl.uiuc.Main;
@@ -18,8 +18,13 @@ import java.util.*;
  * Created by xiaohe on 2/2/15.
  */
 public class InvokerGenerator {
+    private static final String END_EVENT = "__END";
+    private static final String OTHER_EVENT = "other";
+
     private JCodeModel CodeModel;
     private String MonitorName;
+    private List<String> specNames = new ArrayList<>();
+    ;
     private List<String> ActualMonitorNames;
     private SignatureFormulaExtractor.EventsInfo eventsInfo;
     private String outputDir;
@@ -29,7 +34,6 @@ public class InvokerGenerator {
     }
 
     public void generateCustomizedInvoker(String monitorClassPath, SignatureFormulaExtractor.EventsInfo eventsInfo) {
-        List<String> specNames = new ArrayList<>();
         specNames.addAll(eventsInfo.getSpecPropsMap().keySet());
         HashMap<String, int[]> tableSchema = eventsInfo.getTableCol();
         this.eventsInfo = eventsInfo;
@@ -63,6 +67,10 @@ public class InvokerGenerator {
             SingleStreamCodeWriter sscw = new SingleStreamCodeWriter(System.out);
 
             buildInvocationMethod(definedClass, tableSchema);
+
+            if (Main.noticeOtherEvents)
+                buildInvokeOtherMethod(definedClass);
+
             File outputDir = new File(this.outputDir);
             if (!outputDir.exists())
                 outputDir.mkdirs();
@@ -89,6 +97,12 @@ public class InvokerGenerator {
         isMonitoredEventMethod.body()._return(invok);
     }
 
+
+    /**
+     * A special case is "__END" event, which will be only handled once at the end of the trace.
+     *
+     * @param logReaderClass
+     */
     private void initMonitoredEventsList(JDefinedClass logReaderClass) {
         String methodName = "initMonitoredEventsSet";
         int accessModifier = JMod.PRIVATE | JMod.STATIC;
@@ -107,30 +121,16 @@ public class InvokerGenerator {
         }
 
         Set<String> eventList = this.eventsInfo.getTableCol().keySet();
-        for (String eventName : eventList) {
-            String eventAction = this.eventsInfo.getEventAndActionsMap().get(eventName);
-            if (eventAction != null && !eventAction.replaceAll("\\W", "").equals("")) {
-                //if the event action is not empty, then add the event to the monitored list
-                JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
-                invocation.arg(eventName);
-            } else {
-                for (int i = 0; i < allProperties.size(); i++) {
-                    if (this.insideProp(allProperties.get(i), eventName)) {
-                        //if the event occurs inside some property, then it should be monitored
-                        JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
-                        invocation.arg(eventName);
-                        break;
-                    }
-                }
-            }
 
-        }
+        eventList.stream()
+                .filter(str -> !str.equals(END_EVENT))
+                .filter(str -> !str.equals(OTHER_EVENT))
+                .forEach(eventName -> {
+                    JInvocation invocation = initMonitorMethodBody.invoke(setOfEvents, "add");
+                    invocation.arg(eventName);
+                });
 
         initMonitorMethodBody._return(setOfEvents);
-    }
-
-    private boolean insideProp(Property p, String eventName) {
-        return p.getSyntax().contains(eventName);
     }
 
     private void initFields(JDefinedClass logReaderClass) {
@@ -152,6 +152,9 @@ public class InvokerGenerator {
         JVar tmpTable = body.decl(tableSchemaType, "methodInfoTable", initTableExpr);
 
         for (String eventName : tableSchema.keySet()) {
+            if (eventName.equals(END_EVENT) || eventName.equals(OTHER_EVENT))
+                continue;
+
             JExpression numOfArgsExpr = JExpr.lit(tableSchema.get(eventName).length);
 
             JInvocation putMethodInvok = body.invoke(tmpTable, "put");
@@ -163,20 +166,46 @@ public class InvokerGenerator {
 
     private void initLogReaderClass(JDefinedClass definedClass) throws IOException {
         String entryPointCode = Main.getContentFromResource("entryPoint.code");
-        if (Main.IsMonitoringLivenessProperty) {
-            String insertedPrintedMethods = "";
-            String tab = "\t\t";
-            for (int i = 0; i < this.ActualMonitorNames.size(); i++) {
-                insertedPrintedMethods += i == 0 ? '\t' : tab;
-                insertedPrintedMethods += this.ActualMonitorNames.get(i) + ".printAllViolations();\n";
-            }
 
-            insertedPrintedMethods += "\t}";
-            entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}')) + insertedPrintedMethods;
+        if (Main.isMonpolyLog()) {
+            entryPointCode = entryPointCode.replaceAll("LogEntryExtractor_CSV",
+                    "LogEntryExtractor");
         }
 
-        definedClass.direct(entryPointCode);
+        StringBuilder sb = new StringBuilder();
+        if (Main.TimeProp) {
+            this.specNames.forEach(specName -> {
+                String tr = specName + "RuntimeMonitor.timeReminder";
+                sb.append(tr + ".report();\n");
+            });
+        }
 
+        sb.append("if (com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager != " +
+                "null \n&& ! com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager" +
+                ".hasAlreadyReported()) {\n");
+        sb.append("com.runtimeverification.rvmonitor.java.rt.RVMStat.statisticsManager" +
+                ".printStats();\n}\n");
+
+        sb.append("System.out.println(\"Property Satisfied\");\n");
+        entryPointCode = entryPointCode.substring(0, entryPointCode.lastIndexOf('}'))
+                + sb.toString() + "\n}";
+
+
+        JMethod endMethod = definedClass.method(JMod.PRIVATE | JMod.STATIC, Void.TYPE, "endEvent");
+        JBlock endMethodBody = endMethod.body();
+        JClass monitorClass = CodeModel.ref(MonitorName);
+        JInvocation invok = monitorClass.staticInvoke("actionsAtTheEnd");
+        endMethodBody.add(invok);
+
+        definedClass.direct(entryPointCode);
+    }
+
+    private void buildInvokeOtherMethod(JDefinedClass definedClass) {
+        JMethod method = definedClass.method(JMod.PUBLIC | JMod.STATIC, Void.TYPE, "invokeOther");
+        JBlock body = method.body();
+        JClass monitorClass = CodeModel.ref(MonitorName);
+        JInvocation eventMethodInvok = monitorClass.staticInvoke(OTHER_EVENT + "Event");
+        body.add(eventMethodInvok);
     }
 
     private void buildInvocationMethod(JDefinedClass definedClass, HashMap<String, int[]> tableSchema) {
@@ -194,6 +223,9 @@ public class InvokerGenerator {
         JClass monitorClass = CodeModel.ref(MonitorName);
 
         for (String eventName : tableSchema.keySet()) {
+            if (eventName.equals(END_EVENT) || eventName.equals(OTHER_EVENT))
+                continue;
+
             JCase jCase = jSwitch._case(JExpr.lit(eventName));
             JInvocation eventMethodInvok = monitorClass.staticInvoke(eventName + "Event");
             jCase.body().add(eventMethodInvok);
@@ -209,6 +241,14 @@ public class InvokerGenerator {
                         parseIntMethInvok.arg(tupleData.component(index));
 
                         eventMethodInvok.arg(parseIntMethInvok);
+                        break;
+
+                    case RegHelper.LONG_TYPE:
+                        JClass longCls = CodeModel.directClass("Long");
+                        JInvocation parseLongMethInvok = longCls.staticInvoke("parseLong");
+                        parseLongMethInvok.arg(tupleData.component(index));
+
+                        eventMethodInvok.arg(parseLongMethInvok);
                         break;
 
                     case RegHelper.FLOAT_TYPE:

@@ -1,6 +1,6 @@
 @echo off
 
-set SRC_ROOT=%~dp0
+set SRC_ROOT=%~dp0..
 
 set LIB=%SRC_ROOT%\lib
 
