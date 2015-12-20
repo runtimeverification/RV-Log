@@ -21,6 +21,7 @@
                 <include>INSTALL*</include>
                 <include>examples/**</include>
                 <include>config/**</include>
+                <include>lib/*.jar</include>
             </includes>
 			<excludes>
                 <exclude>%regex[.*\.bak]</exclude>
