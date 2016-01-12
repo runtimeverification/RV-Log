@@ -56,26 +56,8 @@
 
     <repositories>
         <repository>
-            <id>runtime-verification</id>
-            <name>Runtime Verification Repository</name>
-            <url>http://office.runtimeverification.com:8888/repository/internal</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>runtime-verification.snapshots</id>
-            <name>Runtime Verification Snapshot Repository</name>
-            <url>http://office.runtimeverification.com:8888/repository/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 
@@ -106,14 +88,11 @@
         </dependency>
 
         <dependency>
-            <groupId>rvm-parser</groupId>
-            <artifactId>javamop.parser</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/javamop-4.0-SNAPSHOT.jar</systemPath>
+            <groupId>com.github.runtimeverification</groupId>
+            <artifactId>javamop</artifactId>
+            <version>master-SNAPSHOT</version>
         </dependency>
     </dependencies>
-
 
 </project>
 
