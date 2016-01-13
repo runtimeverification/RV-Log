@@ -1,40 +1,71 @@
 package rvm;
 
-/**
-* Try the approach of meta-event (manually do the code instrumentation).
-* The event with more params will be analyzed and then,
-* according to the value of specific field, trigger the 
-* corresponding event methods with fewer parameters.
-
-* Another possible approach would be using AspectJ to instrument the log reader,
-* so that the right event method will be invoked inside the advice. That approach
-* is semi-automated and will be tried on the same property, in another (.mop) file. 
-*/
 Insert2(String data) {
-    event insert(String user, String db, String data, long tp)
+static LinkedList<Insert2Monitor> monitorList = new LinkedList<>();
+
+static void check(long time){
+        int size=monitorList.size();
+
+        while(!monitorList.isEmpty()){
+        Insert2Monitor monitor = monitorList.getFirst();
+        if(monitor.deadline > time)
+        return;
+
+        if(monitor.ok)
+           monitorList.removeFirst();
+
+        else{
+        System.err.println("expected data '" + monitor.dat + "' is not inserted into db3 before time " + monitor.deadline);
+	System.exit(1);
+        }
+        }
+        }
+
+private boolean ok;
+
+private long deadline;
+private String dat;
+
+creation event insert(String user, String db, String p, String data, long time)
 	{
+        check(time);
+
 		if (db != null && db.equals("db2"))
 		{
-			insert2DB2(data, tp);
-		} 
+	    this.ok = false;
+            this.deadline = time+60;
+	    this.dat = data;
+
+        monitorList.add(this);
+		}
 
 		if (db != null && db.equals("db3"))
 		{
-			insert2DB3(data, tp);
+		    this.ok = true;	
 		} 
 	}
 
-	event insert2DB2(String data, long tp)
-	{}
 
-	event insert2DB3(String data, long tp)
-	{}
+event select (String user,String b,String c,String d, long time) {        check(time);}
 
-	ltl:
-		[](insert2DB2 => <>[0,60] insert2DB3)
+event update (String user,String b,String c,String d, long time) {        check(time);}
 
-	@violation
-	{System.err.println("The data is not propagated to db3 after inserting to db2.");}
+event delete (String user,String b,String c,String d, long time) {        check(time);}
+
+event script_start (String user, long time) {        check(time);}
+
+event script_end (String user, long time) {        check(time);}
+
+event script_svn (String user,String b,String c,int d,int e, long time) {        check(time);}
+
+event script_md5 (String user,String b, long time) {        check(time);}
+
+event commit (String user,int b, long time) {        check(time);}
+
+ltl: true
+	@fail
+	{System.err.println("...");}
+
 }
 
-}
+
