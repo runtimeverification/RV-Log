@@ -1,22 +1,31 @@
 import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
  * Created by hx312 on 1/12/2016.
  */
+@RunWith(Parameterized.class)
 public class ExampleIT {
     private final TestHelper helper;
 
     private final String path;
 
+    private final String testName;
+
     private final String outputDir = "CustomizedLogReader";
 
-    public ExampleIT() {
+    public ExampleIT(String folder, String testName) {
         this.path = System.getProperty("user.dir") + File.separator + "examples" + File.separator +
-                "SimpleFormula" + File.separator + "Insert" + File.separator + "Insert2.rvm";
+                folder + File.separator + testName + File.separator + testName + ".rvm";
+
+        this.testName = testName;
 
         String classpath = "." + File.pathSeparator + outputDir + File.separator
                 + File.pathSeparator + System.getProperty("java.class.path");
@@ -30,19 +39,30 @@ public class ExampleIT {
         helper = new TestHelper(this.path, envMap);
     }
 
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        ArrayList<Object[]> data = new ArrayList<>();
+        //the examples
+        data.add(new Object[]{"SimpleFormula", "Insert2"});
+
+        return data;
+    }
+
     @Test
     public void test_RVM_Availability() throws Exception {
-        final String testName = "/home/xiaohe/Projects/RV-Log/examples/SimpleFormula/Insert/Insert2";
         String command = Const.binPath + "rv-log";
         if (SystemUtils.IS_OS_WINDOWS) {
             command += ".bat";
         }
-        helper.testCommand(null, false, true, command, testName + ".rvm");
+        helper.testCommand(null, false, true, command, this.path);
 
         //generate monitor library code
         helper.testCommand("", null, false, true, true, "java",
                 "com.runtimeverification.rvmonitor.java.rvj.Main", "-d",
-                outputDir + File.separator + "rvm" + File.separator,
-                testName + ".rvm");
+                outputDir + File.separator + "rvm" + File.separator, this.path);
+
+
+        //delete the output files
+        helper.deleteFiles(true, this.outputDir);
     }
 }
