@@ -15,19 +15,25 @@ import java.util.HashMap;
 public class ExampleIT {
     private final TestHelper helper;
 
-    private final String path;
-
+    private final String testFolder;
     private final String testName;
+
+    private final String testPath;
 
     private final String outputDir = "CustomizedLogReader";
 
+    private String optionsOfRVLog = "";
+
     public ExampleIT(String folder, String testName) {
-        this.path = System.getProperty("user.dir") + File.separator + "examples" + File.separator +
-                folder + File.separator + testName + File.separator + testName + ".rvm";
+        this.testFolder = System.getProperty("user.dir") + File.separator +
+                "examples" + File.separator + folder + File.separator + testName + File.separator;
 
         this.testName = testName;
 
-        String classpath = "." + File.pathSeparator + outputDir + File.separator
+        this.testPath = this.testFolder + testName + ".rvm";
+
+        String classpath = "." + File.pathSeparator + testFolder +
+                File.separator + outputDir + File.separator
                 + File.pathSeparator + System.getProperty("java.class.path");
 
         classpath = Const.libPath + "*" + File.pathSeparator + classpath;
@@ -36,7 +42,15 @@ public class ExampleIT {
         envMap.put("LOGICPLUGINPATH", Const.libPath + "plugins");
         System.setProperty("java.class.path", classpath);
 
-        helper = new TestHelper(this.path, envMap);
+        helper = new TestHelper(this.testPath, envMap);
+
+        switch (this.testName) {
+            case "Insert2":
+                this.optionsOfRVLog = "--format=monpoly";
+                break;
+
+            default:
+        }
     }
 
     @Parameterized.Parameters
@@ -49,20 +63,31 @@ public class ExampleIT {
     }
 
     @Test
-    public void test_RVM_Availability() throws Exception {
+    public void testEG() throws Exception {
         String command = Const.binPath + "rv-log";
         if (SystemUtils.IS_OS_WINDOWS) {
             command += ".bat";
         }
-        helper.testCommand(null, false, true, command, this.path);
+
+        helper.testCommand(null, false, true, command, this.optionsOfRVLog, this.testPath);
 
         //generate monitor library code
         helper.testCommand("", null, false, true, true, "java",
                 "com.runtimeverification.rvmonitor.java.rvj.Main", "-d",
-                outputDir + File.separator + "rvm" + File.separator, this.path);
+                outputDir + File.separator + "rvm" + File.separator, this.testPath);
 
+        //compile java code
+        helper.testCommand("", null, false, true, true, "javac",
+                this.testFolder + (this.outputDir + File.separator + "rvm" +
+                        File.separator + "LogReader.java"));
+
+        //run the log reader
+        helper.testCommand("", this.testName, false, true, false,
+                "java", "rvm.LogReader", this.testFolder + File.separator + "violation.log");
 
         //delete the output files
         helper.deleteFiles(true, this.outputDir);
+        helper.deleteFiles(true, testName + ".actual.out");
+        helper.deleteFiles(true, testName + ".actual.err");
     }
 }

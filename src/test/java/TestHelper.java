@@ -115,7 +115,6 @@ public class TestHelper {
                 actualOutFile = "/dev/null";
                 actualErrFile = "/dev/null";
             }
-
         }
 
         if (!onlyCheckStdErr) {

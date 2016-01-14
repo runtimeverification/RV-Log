@@ -16,7 +16,7 @@ static void check(long time){
 
         else{
         System.err.println("expected data '" + monitor.dat + "' is not inserted into db3 before time " + monitor.deadline);
-	System.exit(1);
+	System.exit(0);
         }
         }
         }
