@@ -21,7 +21,6 @@ public class Main {
     private static String FORMAT = CSV;
     private static boolean strictParsing;
     private static String insertPoint4EventNameChecks = "        if (LogReader.isMonitoredEvent(EventName)) {";
-    public static boolean TimeProp = false;
 
     //if the 'rawEvent' option is on, then the event names will not be read from the log file;
     //instead, the default event name 'data' will be used throughout the log file.
@@ -67,10 +66,8 @@ public class Main {
         genLogReaderPath = initOutputFile();
 
         for (int i = 0; i < args.length; i++) {
-            if ("-t".equals(args[i]))
-                TimeProp = true;
 
-            else if (args[i].equals("--format=monpoly"))
+            if (args[i].equals("--format=monpoly"))
                 FORMAT = MONPOLY;
 
             else if (args[i].equals("--strict"))
