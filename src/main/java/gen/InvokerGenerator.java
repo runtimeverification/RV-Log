@@ -181,9 +181,7 @@ public class InvokerGenerator {
 
         JMethod endMethod = definedClass.method(JMod.PRIVATE | JMod.STATIC, Void.TYPE, "endEvent");
         JBlock endMethodBody = endMethod.body();
-        JClass monitorClass = CodeModel.ref(MonitorName);
-        JInvocation invok = monitorClass.staticInvoke("actionsAtTheEnd");
-        endMethodBody.add(invok);
+        endMethodBody.directStatement("//The body of end event is defined here.\n");
 
         definedClass.direct(entryPointCode);
     }
