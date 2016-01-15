@@ -24,7 +24,16 @@ public class ExampleIT {
 
     private String optionsOfRVLog = "";
 
-    public ExampleIT(String folder, String testName) {
+    public static final String valid = "valid";
+    public static final String violation = "violation";
+
+    private final int numOfValid;
+    private final int numOfViolation;
+
+    public ExampleIT(String folder, String testName, int goodNum, int badNum) {
+        this.numOfValid = goodNum;
+        this.numOfViolation = badNum;
+
         this.testFolder = System.getProperty("user.dir") + File.separator +
                 "examples" + File.separator + folder + File.separator + testName + File.separator;
 
@@ -56,8 +65,9 @@ public class ExampleIT {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         ArrayList<Object[]> data = new ArrayList<>();
-        //the examples
-        data.add(new Object[]{"SimpleFormula", "Insert2"});
+        //the examples: the last two args are the number of
+        //valid examples and violation examples respectively.
+        data.add(new Object[]{"SimpleFormula", "Insert2", 0, 1});
 
         return data;
     }
@@ -81,13 +91,36 @@ public class ExampleIT {
                 this.testFolder + (this.outputDir + File.separator + "rvm" +
                         File.separator + "LogReader.java"));
 
-        //run the log reader
-        helper.testCommand("", this.testName, false, true, false,
-                "java", "rvm.LogReader", this.testFolder + File.separator + "violation.log");
+        checkValidExamples();
+
+        checkViolationExamples();
+
 
         //delete the output files
         helper.deleteFiles(true, this.outputDir);
-        helper.deleteFiles(true, testName + ".actual.out");
-        helper.deleteFiles(true, testName + ".actual.err");
+
+    }
+
+    private void checkViolationExamples() throws Exception {
+        //run the log reader
+        for (int i = 1; i <= this.numOfViolation; i++) {
+            String relativePathI = violation + File.separator + i;
+
+            String testPrefix = relativePathI + File.separator + violation;
+
+            String log = this.testFolder + testPrefix + ".log";
+            String actualOut = testPrefix + ".actual.out";
+            String actualErr = testPrefix + ".actual.err";
+
+            helper.testCommand(relativePathI, violation, false, true, false,
+                    "java", "rvm.LogReader", log);
+
+            helper.deleteFiles(true, actualOut);
+            helper.deleteFiles(true, actualErr);
+        }
+    }
+
+    private void checkValidExamples() {
+        //TODO
     }
 }

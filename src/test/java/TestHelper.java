@@ -102,7 +102,8 @@ public class TestHelper {
         String expectedOutFile = null;
         String expectedErrFile = null;
         if (expectedFilePrefix != null) {
-            testsPrefix = basePath.toString() + "/" + relativePath + "/" + expectedFilePrefix;
+            testsPrefix = basePath.toString() + File.separator
+                        + relativePath + File.separator + expectedFilePrefix;
             actualOutFile = testsPrefix + ".actual.out";
             actualErrFile = testsPrefix + ".actual.err";
             expectedOutFile = testsPrefix + ".expected.out";
