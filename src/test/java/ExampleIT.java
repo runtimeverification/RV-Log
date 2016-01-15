@@ -67,7 +67,7 @@ public class ExampleIT {
         ArrayList<Object[]> data = new ArrayList<>();
         //the examples: the last two args are the number of
         //valid examples and violation examples respectively.
-        data.add(new Object[]{"SimpleFormula", "Insert2", 0, 1});
+        data.add(new Object[]{"SimpleFormula", "Insert2", 0, 2});
 
         return data;
     }
