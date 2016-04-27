@@ -10,3 +10,13 @@ on the wiki.
 
 The monitor for monitoring the specification can be created by the run.sh script by simply removing
 the last two lines (The last two lines invoke the monitor to do the real monitoring). 
+
+================
+E.G. to run the example Pub, just execute the command below in the current directory:
+
+./run.sh Pub/pub-good.csv Pub/rvm/Pub.rvm
+
+or
+
+./run.sh Pub/pub-invalid1.csv Pub/rvm/Pub.rvm
+
