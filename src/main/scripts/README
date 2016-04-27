@@ -2,7 +2,7 @@ After running install.sh, a folder called RV-Log will be extracted from the arch
 
 The run.sh is the script that runs the tool.
 
-The first two arguments of "run.sh" should trace file and specification file resp.
+The first two arguments of "run.sh" should be the relative path to the trace file and specification file resp.
 
 The command line options include -events, -witness and -trace can be placed after
 the two required arguments, in any order. The effects of these options follow the requirements
